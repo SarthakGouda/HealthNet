@@ -1,0 +1,40 @@
+/* Compliance — uses shared classes from src/styles.css.
+ * Only component-specific overrides live here. */
+
+.deleted-row { opacity: .5; }
+.notes-cell  { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.badge-deleted {
+  background: #f5f5f5; color: #a0aec0;
+  font-size: 11px; padding: 2px 8px; border-radius: 10px;
+}
+
+/* 4-result picker (radio pills) */
+.result-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.result-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 12px; border: 1px solid var(--hn-primary-soft);
+  border-radius: 10px; cursor: pointer; background: #fff;
+  transition: border .15s, background .15s;
+}
+.result-pill input { display: none; }
+.result-pill .result-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.result-pill .result-name { font-size: 12px; color: var(--hn-text-base); font-weight: 500; }
+.result-pill:hover { border-color: var(--hn-border-soft); background: #f7faff; }
+.result-pill.selected {
+  border-color: var(--hn-primary);
+  background: var(--hn-primary-soft);
+  box-shadow: 0 0 0 3px rgba(24,95,165,.08);
+}
+.result-dot.badge-compliant { background: #22c55e; }
+.result-dot.badge-non       { background: #dc2626; }
+.result-dot.badge-partial   { background: #f59e0b; }
+.result-dot.badge-pending   { background: #6366f1; }
+
+@media (max-width: 900px) { .result-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 768px) {
+  .table-wrap table th:nth-child(2),
+  .table-wrap table td:nth-child(2),
+  .table-wrap table th:nth-child(6),
+  .table-wrap table td:nth-child(6) { display: none; }
+}

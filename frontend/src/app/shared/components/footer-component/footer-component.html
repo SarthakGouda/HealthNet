@@ -1,0 +1,56 @@
+<footer class="hn-footer" [class.hn-footer-dark]="variant === 'dark'" [class.hn-footer-compact]="compact">
+
+  <div class="hn-footer-main" *ngIf="!compact">
+    <div class="hn-footer-grid">
+
+      <div class="hn-footer-col hn-footer-brand">
+        <div class="hn-brand-row">
+          <div class="hn-brand-mark"><i class="ti ti-shield-check"></i></div>
+          <span class="hn-brand-name">HealthNet</span>
+        </div>
+        <p>
+          A public-health & disease-surveillance platform connecting citizens, clinicians,
+          labs and officers on one audit-ready system.
+        </p>
+      </div>
+
+      <div class="hn-footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a routerLink="/">Home</a></li>
+          <li><a routerLink="/about">About</a></li>
+          <li><a routerLink="/compliance">Compliance</a></li>
+          <li><a routerLink="/analytics">Analytics</a></li>
+        </ul>
+      </div>
+
+      <div class="hn-footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a routerLink="/login">Sign in</a></li>
+          <li><a routerLink="/register">Create account</a></li>
+          <li><a routerLink="/forgot-password">Reset password</a></li>
+          <li><a routerLink="/profile">Profile</a></li>
+        </ul>
+      </div>
+
+      <div class="hn-footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><span class="hn-muted">support&#64;healthnet.local</span></li>
+          <li><span class="hn-muted">Mon–Fri · 9am–6pm</span></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="hn-footer-bottom">
+    <span>© {{ year }} HealthNet · Public-health surveillance, audited end-to-end</span>
+    <span class="hn-footer-links">
+      <a routerLink="/about">About</a>
+      <span class="hn-sep">·</span>
+      <a routerLink="/compliance">Compliance</a>
+    </span>
+  </div>
+</footer>

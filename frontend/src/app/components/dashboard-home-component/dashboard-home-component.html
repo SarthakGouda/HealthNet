@@ -1,0 +1,63 @@
+<div class="dh-page">
+  <div class="dh-header">
+    <div class="dh-header-inner">
+      <div class="dh-left">
+        <div class="page-badge"><span class="live-dot"></span>{{ role }}</div>
+        <h1 class="dh-title">{{ currentTime }}, {{ userName || role }}!</h1>
+        <p class="dh-sub">{{ roleSubtitle }} · {{ today | date:'EEEE, MMM d, yyyy' }}</p>
+      </div>
+      <div class="dh-right">
+        <div class="role-icon-wrap"><i class="ti" [ngClass]="roleIcon"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dh-body">
+
+    <!-- Role-relevant stats -->
+    <div class="dh-stats-row" *ngIf="stats.length > 0 || isStatsLoading">
+      <div class="dh-stat" *ngFor="let s of stats">
+        <div class="dh-stat-icon" [style.background]="s.tint" [style.color]="s.color">
+          <i class="ti" [ngClass]="s.icon"></i>
+        </div>
+        <div class="dh-stat-body">
+          <div class="dh-stat-val">{{ s.value }}</div>
+          <div class="dh-stat-lbl">{{ s.label }}</div>
+          <div class="dh-stat-sub" *ngIf="s.sub">{{ s.sub }}</div>
+        </div>
+      </div>
+      <div class="dh-stat dh-stat-skel" *ngIf="isStatsLoading && stats.length === 0">
+        <div class="dh-stat-icon"><i class="ti ti-loader-2 spin"></i></div>
+        <div class="dh-stat-body">
+          <div class="dh-stat-val">…</div>
+          <div class="dh-stat-lbl">Loading insights</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Role-specific tip -->
+    <div class="dh-tip" *ngIf="tip">
+      <i class="ti ti-bulb"></i>
+      <span><strong>Tip:</strong> {{ tip }}</span>
+    </div>
+
+    <div class="sec-title-row">
+      <i class="ti ti-bolt"></i>
+      <span>Quick Access</span>
+    </div>
+
+    <div class="actions-grid">
+      <button class="action-tile" *ngFor="let a of actions" (click)="navigateTo(a.route)">
+        <div class="tile-icon" [style.background]="a.bg"><i class="ti" [ngClass]="a.icon" [style.color]="a.color" style="font-size:22px"></i></div>
+        <span class="tile-label">{{ a.label }}</span>
+        <span class="tile-sub">{{ a.sub }}</span>
+        <i class="ti ti-arrow-right tile-arrow"></i>
+      </button>
+    </div>
+
+    <div class="empty-actions" *ngIf="actions.length === 0">
+      <i class="ti ti-home"></i>
+      <p>No quick actions configured for your role</p>
+    </div>
+  </div>
+</div>

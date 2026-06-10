@@ -1,0 +1,199 @@
+<div class="page">
+
+  <!-- ── Page Header (gradient) ─────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="brand-row">
+          <div class="brand-logo">
+            <i class="ti ti-virus"></i>
+          </div>
+          <div>
+            <h1>Declare New Outbreak</h1>
+            <p class="subtitle">Submit a new disease outbreak for public health monitoring</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button type="button" class="header-btn" (click)="onCancel()">
+          <i class="ti ti-arrow-left"></i>
+          Back to Outbreaks
+        </button>
+        <div class="page-badge">
+          <span class="live-dot"></span>
+          Outbreak Registry
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page Body ──────────────────────────────────────────── -->
+  <div class="page-body">
+
+    <!-- Success Banner -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="ti ti-circle-check"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="alert alert-error" *ngIf="apiError">
+      <i class="ti ti-alert-circle"></i>
+      <span>{{ apiError }}</span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-outbreak">
+          <i class="ti ti-alert-triangle"></i>
+        </div>
+        <div>
+          <h2 class="card-title">Outbreak Details</h2>
+          <p class="card-subtitle">All fields are required. Dates must not be in the future.</p>
+        </div>
+      </div>
+
+      <form [formGroup]="outbreakForm" (ngSubmit)="onSubmit()" novalidate>
+        <div class="form-grid">
+
+          <!-- Disease -->
+          <div class="form-group">
+            <label class="field-label" for="disease">
+              <i class="ti ti-virus icon-inline"></i>
+              Disease Name <span class="required">*</span>
+            </label>
+            <input
+              id="disease"
+              type="text"
+              class="form-control"
+              formControlName="disease"
+              placeholder="e.g. Influenza A"
+              [class.is-invalid]="disease.invalid && disease.touched"
+            />
+            <div class="field-errors" *ngIf="disease.touched && disease.errors">
+              <span *ngIf="disease.errors['required']"><i class="ti ti-alert-circle"></i> Disease name is required.</span>
+              <span *ngIf="disease.errors['specialChars']"><i class="ti ti-alert-circle"></i> Special characters are not allowed.</span>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="form-group">
+            <label class="field-label" for="location">
+              <i class="ti ti-map-pin icon-inline"></i>
+              Location <span class="required">*</span>
+            </label>
+            <input
+              id="location"
+              type="text"
+              class="form-control"
+              formControlName="location"
+              placeholder="e.g. North Region, District 4"
+              [class.is-invalid]="location.invalid && location.touched"
+            />
+            <div class="field-errors" *ngIf="location.touched && location.errors">
+              <span *ngIf="location.errors['required']"><i class="ti ti-alert-circle"></i> Location is required.</span>
+              <span *ngIf="location.errors['minlength']"><i class="ti ti-alert-circle"></i> Location must be at least 3 characters.</span>
+              <span *ngIf="location.errors['specialChars']"><i class="ti ti-alert-circle"></i> Special characters are not allowed.</span>
+            </div>
+          </div>
+
+          <!-- Severity -->
+          <div class="form-group">
+            <label class="field-label" for="severity">
+              <i class="ti ti-alert-triangle icon-inline"></i>
+              Severity Level <span class="required">*</span>
+            </label>
+            <div class="select-wrapper" [class.is-invalid]="severity.invalid && severity.touched">
+              <select id="severity" class="form-control" formControlName="severity">
+                <option value="" disabled>Select severity level</option>
+                <option *ngFor="let s of severityOptions" [value]="s">{{ s }}</option>
+              </select>
+              <i class="ti ti-chevron-down select-icon"></i>
+            </div>
+            <div class="field-errors" *ngIf="severity.touched && severity.errors">
+              <span *ngIf="severity.errors['required']"><i class="ti ti-alert-circle"></i> Severity level is required.</span>
+            </div>
+          </div>
+
+          <div class="form-group form-group-empty"></div>
+
+          <!-- Start Date -->
+          <div class="form-group">
+            <label class="field-label" for="startDate">
+              <i class="ti ti-calendar icon-inline"></i>
+              Start Date <span class="required">*</span>
+            </label>
+            <input
+              id="startDate"
+              type="date"
+              class="form-control"
+              formControlName="startDate"
+              [max]="today"
+              [class.is-invalid]="startDate.invalid && startDate.touched"
+            />
+            <div class="field-errors" *ngIf="startDate.touched && startDate.errors">
+              <span *ngIf="startDate.errors['required']"><i class="ti ti-alert-circle"></i> Start date is required.</span>
+              <span *ngIf="startDate.errors['futureDate']"><i class="ti ti-alert-circle"></i> Start date cannot be in the future.</span>
+            </div>
+          </div>
+
+          <!-- End Date -->
+          <div class="form-group">
+            <label class="field-label" for="endDate">
+              <i class="ti ti-calendar icon-inline"></i>
+              End Date <span class="required">*</span>
+            </label>
+            <input
+              id="endDate"
+              type="date"
+              class="form-control"
+              formControlName="endDate"
+              [max]="today"
+              [class.is-invalid]="
+                (endDate.invalid && endDate.touched) ||
+                (outbreakForm.errors?.['endBeforeStart'] && endDate.touched)
+              "
+            />
+            <div class="field-errors" *ngIf="endDate.touched">
+              <span *ngIf="endDate.errors?.['required']"><i class="ti ti-alert-circle"></i> End date is required.</span>
+              <span *ngIf="endDate.errors?.['futureDate']"><i class="ti ti-alert-circle"></i> End date cannot be in the future.</span>
+              <span *ngIf="!endDate.errors && outbreakForm.errors?.['endBeforeStart']">
+                <i class="ti ti-alert-circle"></i> End date must be after start date.
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Info note -->
+        <div class="info-note">
+          <i class="ti ti-info-circle"></i>
+          <span>
+            Outbreak status is managed automatically by the system based on the end date.
+            Duplicate entries for the same disease and location will be rejected.
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn-outline"
+                  (click)="onCancel()" [disabled]="isLoading">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="isLoading">
+            <ng-container *ngIf="!isLoading">
+              <i class="ti ti-send"></i>
+              Declare Outbreak
+            </ng-container>
+            <ng-container *ngIf="isLoading">
+              <span class="spinner"></span>
+              Submitting...
+            </ng-container>
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>

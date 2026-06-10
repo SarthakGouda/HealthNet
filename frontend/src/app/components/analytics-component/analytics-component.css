@@ -1,0 +1,107 @@
+/* Analytics — uses shared classes from src/styles.css.
+ * Only the dashboard widgets (tabs / KPIs / bar chart / donut) live here. */
+
+.tab-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+.tab-btn {
+  padding: 7px 14px; background: #fff;
+  border: 1px solid var(--hn-border-soft);
+  border-radius: var(--hn-radius-sm);
+  font-size: 12px; font-weight: 500;
+  color: var(--hn-text-muted); cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  font-family: 'Inter', sans-serif; transition: all .15s;
+}
+.tab-btn:hover  { border-color: var(--hn-primary); color: var(--hn-primary); }
+.tab-btn.active { background: var(--hn-primary); color: #fff; border-color: var(--hn-primary); }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px; margin-bottom: 16px;
+}
+.kpi-card {
+  background: #fff;
+  border: 1px solid var(--hn-border-soft);
+  border-radius: var(--hn-radius);
+  padding: 18px 16px;
+  animation: hn-fadeUp .3s ease;
+}
+.kpi-label {
+  font-size: 11px; font-weight: 500; color: var(--hn-text-muted);
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.kpi-val { font-size: 28px; font-weight: 600; line-height: 1; }
+.kpi-card.blue  .kpi-val { color: var(--hn-primary); }
+.kpi-card.green .kpi-val { color: #0F6E56; }
+.kpi-card.amber .kpi-val { color: #854F0B; }
+.kpi-card.red   .kpi-val { color: #791F1F; }
+.kpi-card.teal  .kpi-val { color: #0F6E56; }
+.kpi-card.gray  .kpi-val { color: var(--hn-text-muted); }
+
+/* Bar chart — pure CSS */
+.bar-chart { display: flex; flex-direction: column; gap: 10px; }
+.bar-row {
+  display: grid; grid-template-columns: 140px 1fr 70px;
+  gap: 10px; align-items: center;
+}
+.bar-label { font-size: 12px; color: #4a5568; font-weight: 500; }
+.bar-track {
+  background: #f0f4fa;
+  border-radius: 6px;
+  height: 14px;
+  overflow: hidden;
+  position: relative;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width .5s ease;
+}
+.bar-blue  { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+.bar-green { background: linear-gradient(90deg, #22c55e, #15803d); }
+.bar-red   { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+.bar-amber { background: linear-gradient(90deg, #f59e0b, #b45309); }
+.bar-gray  { background: linear-gradient(90deg, #a0aec0, #718096); }
+.bar-value {
+  font-size: 13px; font-weight: 600;
+  color: var(--hn-primary-dark); text-align: right;
+}
+
+/* Donut chart */
+.donut-wrap {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 24px; align-items: center;
+}
+.donut { width: 160px; height: 160px; }
+.donut-text-num {
+  font-size: 14px; font-weight: 600; fill: var(--hn-primary-dark);
+}
+.donut-text-lbl {
+  font-size: 9px; fill: var(--hn-text-muted);
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.legend { display: flex; flex-direction: column; gap: 8px; }
+.legend-row {
+  display: grid; grid-template-columns: 16px 1fr auto;
+  gap: 10px; align-items: center;
+}
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; display: block; }
+.legend-lbl { font-size: 13px; color: #4a5568; }
+.legend-val { font-size: 13px; font-weight: 600; color: var(--hn-primary-dark); }
+
+.chart-card .card-head { margin-bottom: 14px; }
+
+/* Citizen info banner */
+.info-card {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--hn-primary-soft); border-color: var(--hn-border-soft);
+}
+.info-card > i { color: var(--hn-primary-dark); font-size: 20px; margin-top: 2px; }
+.info-title { font-weight: 600; color: var(--hn-primary-dark); font-size: 14px; margin-bottom: 2px; }
+.info-sub   { font-size: 12px; color: #4a5568; }
+
+@media (max-width: 768px) {
+  .bar-row { grid-template-columns: 100px 1fr 60px; }
+  .donut-wrap { grid-template-columns: 1fr; justify-items: center; }
+}

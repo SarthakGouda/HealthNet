@@ -1,0 +1,143 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-stethoscope"></i></div>
+        <div>
+          <div class="page-title">Case Management</div>
+          <div class="page-sub"><span class="dot"></span>Disease Cases · HealthNet</div>
+        </div>
+      </div>
+      <button class="btn-create" *ngIf="canCreate" (click)="showCreateForm = !showCreateForm">
+        <i class="ti ti-plus"></i> {{ showCreateForm ? 'Cancel' : 'Create Case' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Create Form -->
+    <div class="card form-card" *ngIf="showCreateForm">
+      <div class="card-head"><i class="ti ti-plus"></i> Create New Case</div>
+      <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Symptom Report *</label>
+            <app-id-picker
+              [options]="reportOptions$ | async"
+              placeholder="Choose a symptom report…"
+              emptyText="No eligible reports (citizens already with a case are hidden)"
+              formControlName="reportId">
+            </app-id-picker>
+            <small class="hint-err" *ngIf="createForm.get('reportId')?.touched && createForm.get('reportId')?.invalid">
+              Pick the symptom report this case is for.
+            </small>
+            <small class="muted-hint">
+              <i class="ti ti-info-circle"></i>
+              Citizens who already have a case are hidden — the backend allows only one case per citizen.
+            </small>
+          </div>
+          <div class="field">
+            <label>Status *</label>
+            <select formControlName="status" class="form-select">
+              <option [ngValue]="false">Under Treatment</option>
+              <option [ngValue]="true">Recovered</option>
+            </select>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Diagnosis *</label>
+          <textarea formControlName="diagnosis" rows="3" placeholder="Describe the diagnosis (min 3 chars, not just digits)..." class="form-control"></textarea>
+          <small class="hint-err" *ngIf="createForm.get('diagnosis')?.touched && createForm.get('diagnosis')?.errors?.['required']">
+            Diagnosis is required.
+          </small>
+          <small class="hint-err" *ngIf="createForm.get('diagnosis')?.errors?.['minlength']">
+            At least 3 characters.
+          </small>
+          <small class="hint-err" *ngIf="createForm.get('diagnosis')?.errors?.['placeholder']">
+            "string" is a placeholder — please type the real diagnosis.
+          </small>
+          <small class="hint-err" *ngIf="createForm.get('diagnosis')?.errors?.['allDigits']">
+            Diagnosis cannot be only digits.
+          </small>
+        </div>
+        <div class="info-hint">
+          <i class="ti ti-info-circle"></i>
+          A case is created per citizen — if a case already exists for the citizen behind this report, the backend will reject it.
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i>{{ isSubmitting ? 'Creating...' : 'Create Case' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="showCreateForm = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit inline form -->
+    <div class="card form-card" *ngIf="editingCaseId">
+      <div class="card-head"><i class="ti ti-edit"></i> Update Diagnosis — Case #{{ editingCaseId }}</div>
+      <form [formGroup]="editForm" (ngSubmit)="onEdit()" class="reg-form">
+        <div class="field full">
+          <label>Updated Diagnosis *</label>
+          <textarea formControlName="diagnosis" rows="3" class="form-control"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary"><i class="ti ti-device-floppy"></i> Update</button>
+          <button type="button" class="btn-ghost" (click)="editingCaseId = null">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading">
+      <div class="spinner"></div><p class="muted">Loading cases...</p>
+    </div>
+
+    <div class="card" *ngIf="!isLoading">
+      <div class="card-head between">
+        <span><i class="ti ti-stethoscope"></i> All Cases</span>
+        <span class="count-badge">{{ cases.length }} records</span>
+      </div>
+      <div class="empty" *ngIf="cases.length === 0">
+        <i class="ti ti-stethoscope"></i>
+        <div class="empty-title">No cases found</div>
+        <div class="empty-sub">Create a case from a symptom report</div>
+      </div>
+      <div class="table-wrap" *ngIf="cases.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Case ID</th>
+              <th>Citizen</th>
+              <th>Doctor</th>
+              <th>Diagnosis</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th *ngIf="canEdit || canDelete">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of cases">
+              <td class="id-cell">#{{ c.caseId }}</td>
+              <td>{{ c.citizenName || ('Citizen ' + c.citizenId) }}</td>
+              <td>{{ c.doctorName || ('Dr. ' + c.doctorId) }}</td>
+              <td class="diag-cell">{{ c.diagnosis }}</td>
+              <td>{{ formatDate(c.date) }}</td>
+              <td><span class="badge" [ngClass]="getStatusClass(c.status)">{{ getStatusLabel(c.status) }}</span></td>
+              <td *ngIf="canEdit || canDelete">
+                <button class="row-btn btn-edit" *ngIf="canEdit && !c.status" (click)="startEdit(c)">
+                  <i class="ti ti-edit"></i> Edit
+                </button>
+                <button class="row-btn btn-danger" *ngIf="canDelete" (click)="deleteCase(c.caseId)">
+                  <i class="ti ti-trash"></i> Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

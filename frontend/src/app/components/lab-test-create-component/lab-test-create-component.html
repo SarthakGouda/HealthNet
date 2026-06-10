@@ -1,0 +1,132 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="ti ti-flask"></i>
+        </div>
+        <div>
+          <div class="page-title">Create Lab Test</div>
+          <div class="page-sub">
+            <span class="dot"></span> New Lab Test · HealthNet
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-back" (click)="goBack()">
+          <i class="ti ti-arrow-left"></i> Back to Tests
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Success message -->
+    <div class="success-card" *ngIf="successMsg">
+      <i class="ti ti-circle-check"></i> {{ successMsg }}
+      <button class="btn-view" (click)="goBack()">
+        View All Tests <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-card" *ngIf="errorMsg">
+      <i class="ti ti-alert-circle"></i> {{ errorMsg }}
+    </div>
+
+    <!-- Form Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="ti ti-plus"></i> Lab Test Details
+        </div>
+        <div class="required-note">
+          <i class="ti ti-info-circle"></i> All fields are required
+        </div>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- Patient -->
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-user"></i> Patient
+          </label>
+          <app-id-picker
+            [options]="patients$ | async"
+            placeholder="Choose a patient…"
+            [(ngModel)]="patientId">
+          </app-id-picker>
+          <div class="invalid-feedback" *ngIf="patientIdError">
+            <i class="ti ti-alert-circle"></i> {{ patientIdError }}
+          </div>
+        </div>
+
+        <!-- Test Type -->
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-flask"></i> Test Type
+          </label>
+          <select
+            class="form-select"
+            [class.is-invalid]="typeError"
+            [(ngModel)]="selectedType">
+            <option value="">Select test type</option>
+            <option *ngFor="let type of typeOptions" [value]="type">
+              {{ type }}
+            </option>
+          </select>
+          <div class="invalid-feedback" *ngIf="typeError">
+            <i class="ti ti-alert-circle"></i> {{ typeError }}
+          </div>
+        </div>
+
+        <!-- Technician -->
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-stethoscope"></i> Lab Technician
+          </label>
+          <app-id-picker
+            [options]="technicians$ | async"
+            placeholder="Assign a technician…"
+            emptyText="No technicians cached — type the User ID below."
+            [allowManualEntry]="true"
+            [(ngModel)]="technicianId">
+          </app-id-picker>
+          <div class="invalid-feedback" *ngIf="technicianIdError">
+            <i class="ti ti-alert-circle"></i> {{ technicianIdError }}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Info note -->
+      <div class="info-note">
+        <i class="ti ti-info-circle"></i>
+        Date will be automatically set to current UTC time. Status will be set to <strong>Pending</strong> by default.
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button
+          class="btn-primary"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting">
+          <i class="ti ti-plus"></i>
+          {{ isSubmitting ? 'Creating...' : 'Create Lab Test' }}
+        </button>
+        <button class="btn-ghost" (click)="resetForm()" [disabled]="isSubmitting">
+          <i class="ti ti-refresh"></i> Reset
+        </button>
+        <button class="btn-outline" (click)="goBack()" [disabled]="isSubmitting">
+          <i class="ti ti-x"></i> Cancel
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>

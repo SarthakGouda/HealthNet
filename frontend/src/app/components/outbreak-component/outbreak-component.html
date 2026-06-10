@@ -1,0 +1,197 @@
+<p>outbreak-component works!</p>
+<div class="page-wrapper">
+
+  <!-- ── Page Header ─────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="onCancel()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5M12 5l-7 7 7 7"/>
+        </svg>
+        Back to Outbreaks
+      </button>
+      <h1>Declare New Outbreak</h1>
+      <p class="subtitle">Submit a new disease outbreak for public health monitoring</p>
+    </div>
+    <div class="header-badge">
+      <span class="badge-dot"></span>
+      Outbreak Registry
+    </div>
+  </div>
+
+  <!-- ── Success Banner ──────────────────────────────────── -->
+  <div class="alert alert-success" *ngIf="successMessage">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+      <polyline points="22 4 12 14.01 9 11.01"/>
+    </svg>
+    {{ successMessage }}
+  </div>
+
+  <!-- ── Error Banner ────────────────────────────────────── -->
+  <div class="alert alert-error" *ngIf="apiError">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="8" x2="12" y2="12"/>
+      <line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ apiError }}
+  </div>
+
+  <!-- ── Form Card ───────────────────────────────────────── -->
+  <div class="form-card">
+
+    <div class="form-card-header">
+      <div class="form-card-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="12" y1="18" x2="12" y2="12"/>
+          <line x1="9"  y1="15" x2="15" y2="15"/>
+        </svg>
+      </div>
+      <div>
+        <h2>Outbreak Details</h2>
+        <p>All fields are required. Dates must not be in the future.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="outbreakForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="form-grid">
+
+        <!-- Disease -->
+        <div class="form-group">
+          <label for="disease">Disease Name <span class="required">*</span></label>
+          <input
+            id="disease"
+            type="text"
+            formControlName="disease"
+            placeholder="e.g. Influenza A"
+            [class.is-error]="disease.invalid && disease.touched"
+          />
+          <div class="field-errors" *ngIf="disease.touched && disease.errors">
+            <span *ngIf="disease.errors['required']">Disease name is required.</span>
+            <span *ngIf="disease.errors['specialChars']">Special characters are not allowed.</span>
+          </div>
+        </div>
+
+        <!-- Location -->
+        <div class="form-group">
+          <label for="location">Location <span class="required">*</span></label>
+          <input
+            id="location"
+            type="text"
+            formControlName="location"
+            placeholder="e.g. North Region, District 4"
+            [class.is-error]="location.invalid && location.touched"
+          />
+          <div class="field-errors" *ngIf="location.touched && location.errors">
+            <span *ngIf="location.errors['required']">Location is required.</span>
+            <span *ngIf="location.errors['minlength']">Location must be at least 3 characters.</span>
+            <span *ngIf="location.errors['specialChars']">Special characters are not allowed.</span>
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div class="form-group">
+          <label for="severity">Severity Level <span class="required">*</span></label>
+          <div class="select-wrapper"
+               [class.is-error]="severity.invalid && severity.touched">
+            <select id="severity" formControlName="severity">
+              <option value="" disabled>Select severity level</option>
+              <option *ngFor="let s of severityOptions" [value]="s">{{ s }}</option>
+            </select>
+            <svg class="select-icon" width="14" height="14" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="field-errors" *ngIf="severity.touched && severity.errors">
+            <span *ngIf="severity.errors['required']">Severity level is required.</span>
+          </div>
+        </div>
+
+        <!-- empty cell — keeps 2-col grid tidy -->
+        <div class="form-group form-group-empty"></div>
+
+        <!-- Start Date -->
+        <div class="form-group">
+          <label for="startDate">Start Date <span class="required">*</span></label>
+          <input
+            id="startDate"
+            type="date"
+            formControlName="startDate"
+            [max]="today"
+            [class.is-error]="startDate.invalid && startDate.touched"
+          />
+          <div class="field-errors" *ngIf="startDate.touched && startDate.errors">
+            <span *ngIf="startDate.errors['required']">Start date is required.</span>
+            <span *ngIf="startDate.errors['futureDate']">Start date cannot be in the future.</span>
+          </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="form-group">
+          <label for="endDate">End Date <span class="required">*</span></label>
+          <input
+            id="endDate"
+            type="date"
+            formControlName="endDate"
+            [max]="today"
+            [class.is-error]="
+              (endDate.invalid && endDate.touched) ||
+              (outbreakForm.errors?.['endBeforeStart'] && endDate.touched)
+            "
+          />
+          <div class="field-errors" *ngIf="endDate.touched">
+            <span *ngIf="endDate.errors?.['required']">End date is required.</span>
+            <span *ngIf="endDate.errors?.['futureDate']">End date cannot be in the future.</span>
+            <span *ngIf="!endDate.errors && outbreakForm.errors?.['endBeforeStart']">
+              End date must be after start date.
+            </span>
+          </div>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <!-- Info note -->
+      <div class="info-note">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8"  x2="12.01" y2="8"/>
+        </svg>
+        Outbreak status is managed automatically by the system based on the end date.
+        Duplicate entries for the same disease and location will be rejected.
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel"
+                (click)="onCancel()" [disabled]="isLoading">
+          Cancel
+        </button>
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <span *ngIf="!isLoading">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+            Declare Outbreak
+          </span>
+          <span *ngIf="isLoading" class="spinner-row">
+            <span class="spinner"></span>
+            Submitting...
+          </span>
+        </button>
+      </div>
+
+    </form>
+  </div><!-- /form-card -->
+
+</div>

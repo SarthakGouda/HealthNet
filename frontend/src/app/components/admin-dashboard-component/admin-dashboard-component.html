@@ -1,0 +1,161 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-settings"></i></div>
+        <div>
+          <div class="page-title">Admin Dashboard</div>
+          <div class="page-sub"><span class="dot"></span>User Management · HealthNet</div>
+        </div>
+      </div>
+      <div class="header-meta">
+        <span class="hdr-badge">Welcome, {{ adminName }}</span>
+        <span class="hdr-date">{{ today | date:'EEE, MMM d' }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- KPI Row — focused on Active members -->
+    <div class="kpi-grid">
+
+      <!-- Active members hero card -->
+      <div class="kpi-card kpi-active-hero">
+        <div class="kpi-active-head">
+          <div class="kpi-icon kpi-icon-lg"><i class="ti ti-user-check"></i></div>
+          <div class="kpi-active-text">
+            <div class="kpi-active-label">Active Members</div>
+            <div class="kpi-active-sub">currently on HealthNet</div>
+          </div>
+          <span class="kpi-active-pct">{{ activePercent }}%</span>
+        </div>
+        <div class="kpi-active-num">{{ activeUsers }} <small>of {{ totalUsers }}</small></div>
+        <div class="kpi-progress" [attr.aria-valuenow]="activePercent" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+          <div class="kpi-progress-fill" [style.width.%]="activePercent"></div>
+        </div>
+        <div class="kpi-active-breakdown">
+          <div class="kab-cell">
+            <i class="ti ti-settings" style="color:#0C447C"></i>
+            <span class="kab-num">{{ adminCount }}</span>
+            <span class="kab-lbl">Admins</span>
+          </div>
+          <div class="kab-cell">
+            <i class="ti ti-stethoscope" style="color:#0F6E56"></i>
+            <span class="kab-num">{{ staffCount }}</span>
+            <span class="kab-lbl">Staff</span>
+          </div>
+          <div class="kab-cell">
+            <i class="ti ti-user" style="color:#185FA5"></i>
+            <span class="kab-num">{{ citizenCount }}</span>
+            <span class="kab-lbl">Citizens</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total users compact card -->
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-icon"><i class="ti ti-users-group"></i></div>
+        <div class="kpi-info"><div class="kpi-val">{{ totalUsers }}</div><div class="kpi-label">Total Users</div></div>
+      </div>
+    </div>
+
+    <!-- Role Distribution -->
+    <div class="card roles-card">
+      <div class="card-head"><i class="ti ti-shield-half-filled"></i> Role Distribution</div>
+      <div class="role-chips">
+        <div class="role-chip" *ngFor="let entry of totalByRole | keyvalue">
+          <span class="role-pill" [style.background]="getRoleBg(entry.key)" [style.color]="getRoleColor(entry.key)">{{ entry.key }}</span>
+          <span class="role-count">{{ entry.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-head"><i class="ti ti-bolt"></i> Quick Actions</div>
+      <div class="quick-grid">
+        <a routerLink="/update" class="quick-tile">
+          <div class="qtile-icon" style="background:#E6F1FB"><i class="ti ti-user-edit" style="color:#185FA5"></i></div>
+          <span class="qtile-label">Update User</span>
+        </a>
+        <a routerLink="/delete" class="quick-tile">
+          <div class="qtile-icon" style="background:#FCEBEB"><i class="ti ti-user-off" style="color:#791F1F"></i></div>
+          <span class="qtile-label">Deactivate User</span>
+        </a>
+        <a routerLink="/patients" class="quick-tile">
+          <div class="qtile-icon" style="background:#E1F5EE"><i class="ti ti-users" style="color:#0F6E56"></i></div>
+          <span class="qtile-label">Patients</span>
+        </a>
+        <a routerLink="/cases" class="quick-tile">
+          <div class="qtile-icon" style="background:#FAEEDA"><i class="ti ti-stethoscope" style="color:#854F0B"></i></div>
+          <span class="qtile-label">Cases</span>
+        </a>
+        <a routerLink="/outbreaks" class="quick-tile">
+          <div class="qtile-icon" style="background:#FCEBEB"><i class="ti ti-virus" style="color:#791F1F"></i></div>
+          <span class="qtile-label">Outbreaks</span>
+        </a>
+        <a routerLink="/analytics" class="quick-tile">
+          <div class="qtile-icon" style="background:#EEEDFE"><i class="ti ti-chart-bar" style="color:#534AB7"></i></div>
+          <span class="qtile-label">Analytics</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- User Table -->
+    <div class="card">
+      <div class="card-head between">
+        <span><i class="ti ti-users"></i> All Users</span>
+        <div class="head-filters">
+          <input type="text" class="search-input-sm" placeholder="Search..." [(ngModel)]="searchTerm" (input)="applyFilter()" />
+          <select class="form-select-sm" [(ngModel)]="selectedRole" (change)="applyFilter()">
+            <option value="">All Roles</option>
+            <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+          </select>
+          <span class="count-badge">{{ filteredUsers.length }}</span>
+        </div>
+      </div>
+
+      <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading users...</p></div>
+
+      <div class="empty" *ngIf="!isLoading && filteredUsers.length === 0">
+        <i class="ti ti-users-group"></i>
+        <div class="empty-title">No users found</div>
+      </div>
+
+      <div class="table-wrap" *ngIf="!isLoading && filteredUsers.length > 0">
+        <table>
+          <thead>
+            <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of filteredUsers">
+              <td class="id-cell">#{{ u.userId ?? u.UserId }}</td>
+              <td>{{ u.name ?? u.Name }}</td>
+              <td class="email-cell">{{ u.email ?? u.Email }}</td>
+              <td>
+                <span class="role-badge-sm"
+                  [style.background]="getRoleBg(u.roleName ?? u.role ?? u.RoleName)"
+                  [style.color]="getRoleColor(u.roleName ?? u.role ?? u.RoleName)">
+                  {{ u.roleName ?? u.role ?? u.RoleName }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="(u.status ?? u.Status)==='Active' ? 'badge-active' : 'badge-inactive'">
+                  {{ u.status ?? u.Status }}
+                </span>
+              </td>
+              <td>
+                <button class="row-btn btn-danger" (click)="deleteUser(u.userId ?? u.UserId)"
+                        *ngIf="(u.status ?? u.Status) === 'Active'">
+                  <i class="ti ti-user-off"></i> Deactivate
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

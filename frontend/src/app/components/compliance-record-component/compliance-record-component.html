@@ -1,0 +1,178 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-shield-check"></i></div>
+        <div>
+          <div class="page-title">Compliance Records</div>
+          <div class="page-sub"><span class="dot"></span>Policy Compliance · HealthNet</div>
+        </div>
+      </div>
+      <button class="btn-create" (click)="showForm = !showForm; editingId = null">
+        <i class="ti ti-plus"></i> {{ showForm ? 'Cancel' : 'Create Compliance Record' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Create -->
+    <div class="card form-card" *ngIf="showForm">
+      <div class="card-head"><i class="ti ti-plus"></i> Create Compliance Record</div>
+      <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Type *</label>
+            <select formControlName="type" class="form-select">
+              <option value="">Select type first…</option>
+              <option *ngFor="let t of types" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Entity *</label>
+            <app-id-picker
+              [options]="entityOptions$ | async"
+              [placeholder]="createForm.get('type')?.value ? 'Choose ' + createForm.get('type')?.value + '…' : 'Pick a type first'"
+              formControlName="entityId">
+            </app-id-picker>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Result *</label>
+          <div class="result-grid">
+            <label class="result-pill" *ngFor="let r of results"
+                   [class.selected]="createForm.get('result')?.value === r.value">
+              <input type="radio" formControlName="result" [value]="r.value" />
+              <span class="result-dot" [ngClass]="r.cssClass"></span>
+              <span class="result-name">{{ r.label }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Notes *</label>
+          <textarea formControlName="notes" rows="3" class="form-control" placeholder="Compliance notes..."></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Save Record' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="showForm = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit -->
+    <div class="card form-card" *ngIf="editingId">
+      <div class="card-head"><i class="ti ti-edit"></i> Update Compliance Record #{{ editingId }}</div>
+      <form [formGroup]="editForm" (ngSubmit)="onEdit()" class="reg-form">
+        <div class="field full">
+          <label>Result *</label>
+          <div class="result-grid">
+            <label class="result-pill" *ngFor="let r of results"
+                   [class.selected]="editForm.get('result')?.value === r.value">
+              <input type="radio" formControlName="result" [value]="r.value" />
+              <span class="result-dot" [ngClass]="r.cssClass"></span>
+              <span class="result-name">{{ r.label }}</span>
+            </label>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Notes *</label>
+          <textarea formControlName="notes" rows="3" class="form-control"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Update' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="editingId = null">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters + lookup by ID -->
+    <div class="card filter-card">
+      <div class="filter-row">
+        <div class="field-sm">
+          <label>Type</label>
+          <select class="form-select" [(ngModel)]="typeFilter" (change)="loadRecords()">
+            <option value="">All Types</option>
+            <option *ngFor="let t of types" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </div>
+        <div class="field-sm">
+          <label>Result</label>
+          <select class="form-select" [(ngModel)]="resultFilter" (change)="loadRecords()">
+            <option value="">All Results</option>
+            <option *ngFor="let r of results" [value]="r.value">{{ r.label }}</option>
+          </select>
+        </div>
+        <div class="field-sm">
+          <label>Entity ID</label>
+          <input type="number" min="1" class="form-control" [(ngModel)]="entityIdFilter" (change)="loadRecords()" placeholder="Optional" />
+        </div>
+        <button class="btn-ghost" (click)="resetFilters()"><i class="ti ti-x"></i> Clear</button>
+        <span class="count-badge">{{ records.length }} records</span>
+      </div>
+      <div class="filter-row">
+        <form [formGroup]="searchByIdForm" (ngSubmit)="onSearchById()" class="inline-form">
+          <label class="hint">Lookup by Compliance ID</label>
+          <input type="number" min="1" class="form-control" formControlName="complianceId" placeholder="e.g. 12" />
+          <button class="btn-ghost" type="submit"><i class="ti ti-search"></i> Get</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading...</p></div>
+
+    <div class="card" *ngIf="!isLoading">
+      <div class="empty" *ngIf="records.length === 0">
+        <i class="ti ti-shield-off"></i>
+        <div class="empty-title">No compliance records</div>
+        <div class="empty-sub">Create your first compliance record</div>
+      </div>
+      <div class="table-wrap" *ngIf="records.length > 0">
+        <table>
+          <thead><tr><th>ID</th><th>Entity</th><th>Type</th><th>Result</th><th>Date</th><th>Notes</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of records" [class.deleted-row]="r.isDeleted">
+              <td class="id-cell">#{{ r.complianceId }}</td>
+              <td>Entity #{{ r.entityId }}</td>
+              <td><span class="type-chip">{{ typeLabel(r.type) }}</span></td>
+              <td><span class="badge" [ngClass]="getResultClass(r.result)">{{ resultLabel(r.result) }}</span></td>
+              <td>{{ formatDate(r.date) }}</td>
+              <td class="notes-cell">{{ r.notes }}</td>
+              <td *ngIf="!r.isDeleted">
+                <button class="row-btn btn-info" (click)="viewById(r.complianceId)" title="View"><i class="ti ti-eye"></i></button>
+                <button class="row-btn btn-edit" (click)="startEdit(r)" title="Edit"><i class="ti ti-edit"></i></button>
+                <button class="row-btn btn-danger" (click)="deleteRecord(r.complianceId)" title="Delete"><i class="ti ti-trash"></i></button>
+              </td>
+              <td *ngIf="r.isDeleted"><span class="badge-deleted">Deleted</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detail modal -->
+    <div class="modal-backdrop" *ngIf="detail" (click)="closeDetail()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div><i class="ti ti-shield-check"></i> Compliance #{{ detail.complianceId }}</div>
+          <button class="icon-btn" (click)="closeDetail()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="kv"><span>Entity</span><b>#{{ detail.entityId }} ({{ typeLabel(detail.type) }})</b></div>
+          <div class="kv"><span>Result</span><b><span class="badge" [ngClass]="getResultClass(detail.result)">{{ resultLabel(detail.result) }}</span></b></div>
+          <div class="kv"><span>Date</span><b>{{ formatDate(detail.date) }}</b></div>
+          <div class="kv"><span>Notes</span><b>{{ detail.notes || '—' }}</b></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

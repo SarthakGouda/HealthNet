@@ -1,0 +1,126 @@
+<div class="about-page">
+
+  <!-- ── Hero ─────────────────────────────────────────────── -->
+  <section class="about-hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-eyebrow">
+          <i class="ti ti-sparkles"></i>
+          <span>About HealthNet</span>
+        </div>
+        <h1>Public health, joined up.</h1>
+        <p>
+          HealthNet brings citizens, clinicians, lab technicians and public health officers
+          onto a single, audit-friendly platform so outbreaks are spotted earlier, cases are
+          managed cleanly, and compliance is provable — not retrofitted.
+        </p>
+        <div class="hero-cta">
+          <a class="ab-btn primary" routerLink="/register" *ngIf="!isloggedIn">
+            <i class="ti ti-user-plus"></i> Create account
+          </a>
+          <a class="ab-btn primary" routerLink="/home" *ngIf="isloggedIn">
+            <i class="ti ti-layout-dashboard"></i> Go to dashboard
+          </a>
+          <a class="ab-btn ghost" routerLink="/compliance">
+            <i class="ti ti-shield-check"></i> Compliance posture
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-art">
+        <img src="assets/images/HealthNet-logo.png" alt="HealthNet" class="hero-logo" onerror="this.style.display='none'" />
+        <div class="art-card art-1">
+          <i class="ti ti-virus"></i>
+          <div>
+            <div class="art-num">3</div>
+            <div class="art-lbl">Active outbreaks</div>
+          </div>
+        </div>
+        <div class="art-card art-2">
+          <i class="ti ti-stethoscope"></i>
+          <div>
+            <div class="art-num">128</div>
+            <div class="art-lbl">Cases this week</div>
+          </div>
+        </div>
+        <div class="art-card art-3">
+          <i class="ti ti-shield-check"></i>
+          <div>
+            <div class="art-num">98.4%</div>
+            <div class="art-lbl">Compliance rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Stat strip ───────────────────────────────────────── -->
+  <section class="about-stats">
+    <div class="stat-strip">
+      <div class="stat-cell" *ngFor="let s of stats">
+        <div class="stat-num">{{ s.num }}</div>
+        <div class="stat-lbl">{{ s.label }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Mission / pillars ────────────────────────────────── -->
+  <section class="about-section">
+    <div class="section-head">
+      <h2>What we care about</h2>
+      <p>Four ideas that shape every screen, every endpoint, every audit trail.</p>
+    </div>
+    <div class="pillar-grid">
+      <div class="pillar" *ngFor="let p of pillars">
+        <div class="pillar-icon"><i class="ti" [ngClass]="p.icon"></i></div>
+        <h3>{{ p.title }}</h3>
+        <p>{{ p.text }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Modules with images ──────────────────────────────── -->
+  <section class="about-section modules">
+    <div class="section-head">
+      <h2>Built for every role</h2>
+      <p>Each user sees just their part of the workflow — but the data is one connected story.</p>
+    </div>
+
+    <div class="module-list">
+      <div class="module-row"
+           *ngFor="let m of modules; let i = index"
+           [class.reverse]="i % 2 === 1">
+        <div class="module-art">
+          <img [src]="m.img" [alt]="m.title" loading="lazy" />
+        </div>
+        <div class="module-copy">
+          <span class="module-tag">{{ m.tag }}</span>
+          <h3>{{ m.title }}</h3>
+          <p>{{ m.text }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Closing CTA ──────────────────────────────────────── -->
+  <section class="about-cta">
+    <div class="cta-inner">
+      <div>
+        <h3>Ready to plug in?</h3>
+        <p>Pick the role that fits and we'll route you to the right workspace.</p>
+      </div>
+      <div class="cta-actions">
+        <a class="ab-btn primary" routerLink="/register" *ngIf="!isloggedIn">
+          <i class="ti ti-user-plus"></i> Create account
+        </a>
+        <a class="ab-btn outline" routerLink="/login" *ngIf="!isloggedIn">
+          <i class="ti ti-login-2"></i> Sign in
+        </a>
+        <a class="ab-btn primary" routerLink="/analytics" *ngIf="isloggedIn">
+          <i class="ti ti-chart-bar"></i> Open analytics
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>

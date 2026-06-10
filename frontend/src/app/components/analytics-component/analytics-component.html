@@ -1,0 +1,211 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-chart-bar"></i></div>
+        <div>
+          <div class="page-title">Analytics & Reporting</div>
+          <div class="page-sub"><span class="dot"></span>Insights Dashboard · HealthNet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Filters -->
+    <div class="card filter-card">
+      <div class="filter-row">
+        <div class="field-sm">
+          <label>Start Date</label>
+          <input type="date" class="form-control" [(ngModel)]="startDate" />
+        </div>
+        <div class="field-sm">
+          <label>End Date</label>
+          <input type="date" class="form-control" [(ngModel)]="endDate" />
+        </div>
+        <div class="field-sm">
+          <label>Status</label>
+          <select class="form-select" [(ngModel)]="statusFilter">
+            <option value="">All</option>
+            <option value="Active">Active</option>
+            <option value="InActive">Inactive</option>
+          </select>
+        </div>
+        <button class="btn-primary" (click)="applyFilters()"><i class="ti ti-refresh"></i> Refresh</button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tab-row">
+      <button *ngFor="let tab of tabs"
+              class="tab-btn"
+              [class.active]="activeTab === tab"
+              (click)="activeTab = tab">
+        <i class="ti" [ngClass]="{
+          'ti-stethoscope':   tab === 'cases',
+          'ti-users':         tab === 'patients',
+          'ti-virus':         tab === 'outbreaks',
+          'ti-microscope':    tab === 'epidemiology',
+          'ti-shield-check':  tab === 'compliance'
+        }"></i>
+        {{ tab | titlecase }}
+      </button>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading analytics...</p></div>
+
+    <!-- ────────────────────────── CASES ─────────────────────────── -->
+    <ng-container *ngIf="activeTab === 'cases' && caseData && !isLoading">
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Total Cases</div><div class="kpi-val">{{ fmt(caseData.totalCases) }}</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">Active</div><div class="kpi-val">{{ fmt(caseData.activecases) }}</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Resolved</div><div class="kpi-val">{{ fmt(caseData.inActiveCases) }}</div></div>
+        <div class="kpi-card teal"><div class="kpi-label">Resolved %</div><div class="kpi-val">{{ pct(caseData.resolvedCasesPercentage) }}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><i class="ti ti-chart-bar"></i> Case status breakdown</div>
+        <div class="bar-chart">
+          <div class="bar-row" *ngFor="let b of caseBars()">
+            <div class="bar-label">{{ b.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [ngClass]="b.cssClass" [style.width.%]="barWidthPct(b, caseBars())"></div>
+            </div>
+            <div class="bar-value">{{ fmt(b.value) }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ───────────────────────── PATIENTS ───────────────────────── -->
+    <ng-container *ngIf="activeTab === 'patients' && patientData && !isLoading">
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Total Patients</div><div class="kpi-val">{{ fmt(patientData.totalPatients) }}</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Active</div><div class="kpi-val">{{ fmt(patientData.activePatients) }}</div></div>
+        <div class="kpi-card gray"><div class="kpi-label">Inactive</div><div class="kpi-val">{{ fmt(patientData.inActivePatients) }}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><i class="ti ti-chart-bar"></i> Patient status breakdown</div>
+        <div class="bar-chart">
+          <div class="bar-row" *ngFor="let b of patientBars()">
+            <div class="bar-label">{{ b.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [ngClass]="b.cssClass" [style.width.%]="barWidthPct(b, patientBars())"></div>
+            </div>
+            <div class="bar-value">{{ fmt(b.value) }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ───────────────────────── OUTBREAKS ──────────────────────── -->
+    <ng-container *ngIf="activeTab === 'outbreaks' && outbreakData && !isLoading">
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Total Outbreaks</div><div class="kpi-val">{{ fmt(outbreakData.totalOutbreaks) }}</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Active</div><div class="kpi-val">{{ fmt(outbreakData.activeOutbreaks) }}</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Resolved</div><div class="kpi-val">{{ fmt(outbreakData.resolvedOutbreaks) }}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><i class="ti ti-chart-bar"></i> Outbreak status</div>
+        <div class="bar-chart">
+          <div class="bar-row" *ngFor="let b of outbreakBars()">
+            <div class="bar-label">{{ b.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [ngClass]="b.cssClass" [style.width.%]="barWidthPct(b, outbreakBars())"></div>
+            </div>
+            <div class="bar-value">{{ fmt(b.value) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" *ngIf="outbreakByDisease().length > 0">
+        <div class="card-head"><i class="ti ti-virus"></i> Top diseases (by outbreak count)</div>
+        <div class="bar-chart">
+          <div class="bar-row" *ngFor="let b of outbreakByDisease()">
+            <div class="bar-label">{{ b.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [ngClass]="b.cssClass" [style.width.%]="barWidthPct(b, outbreakByDisease())"></div>
+            </div>
+            <div class="bar-value">{{ fmt(b.value) }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ───────────────────────── EPIDEMIOLOGY ───────────────────── -->
+    <ng-container *ngIf="activeTab === 'epidemiology' && epiData && !isLoading">
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Total Epi</div><div class="kpi-val">{{ fmt(epiData.totalEpidemiologies) }}</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">Active Epi</div><div class="kpi-val">{{ fmt(epiData.activeEpidemiologies) }}</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Active Outbr.</div><div class="kpi-val">{{ fmt(epiData.activeOutbreaks) }}</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Inactive Outbr.</div><div class="kpi-val">{{ fmt(epiData.inActiveOutbreaks) }}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><i class="ti ti-chart-bar"></i> Epidemiology breakdown</div>
+        <div class="bar-chart">
+          <div class="bar-row" *ngFor="let b of epiBars()">
+            <div class="bar-label">{{ b.label }}</div>
+            <div class="bar-track">
+              <div class="bar-fill" [ngClass]="b.cssClass" [style.width.%]="barWidthPct(b, epiBars())"></div>
+            </div>
+            <div class="bar-value">{{ fmt(b.value) }}</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ───────────────────────── COMPLIANCE ─────────────────────── -->
+    <ng-container *ngIf="activeTab === 'compliance' && complianceData && !isLoading">
+      <div class="kpi-grid">
+        <div class="kpi-card blue"><div class="kpi-label">Total</div><div class="kpi-val">{{ fmt(complianceData.totalCompliances) }}</div></div>
+        <div class="kpi-card green"><div class="kpi-label">Compliant</div><div class="kpi-val">{{ fmt(complianceData.compliantRecords) }}</div></div>
+        <div class="kpi-card red"><div class="kpi-label">Non-Compliant</div><div class="kpi-val">{{ fmt(complianceData.nonCompliantRecords) }}</div></div>
+        <div class="kpi-card amber"><div class="kpi-label">Partial</div><div class="kpi-val">{{ fmt(complianceData.partiallyCompliantRecords) }}</div></div>
+        <div class="kpi-card gray"><div class="kpi-label">Pending</div><div class="kpi-val">{{ fmt(complianceData.pendingReviewRecords) }}</div></div>
+        <div class="kpi-card teal"><div class="kpi-label">Doc Complete %</div><div class="kpi-val">{{ pct(complianceData.completeDocPercentage) }}</div></div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-head"><i class="ti ti-chart-pie"></i> Compliance distribution</div>
+        <div class="donut-wrap">
+          <svg viewBox="0 0 120 120" class="donut">
+            <circle r="50" cx="60" cy="60" fill="transparent" stroke="#f0f4fa" stroke-width="14"/>
+            <ng-container *ngFor="let s of complianceDonut(); let i = index">
+              <circle r="50" cx="60" cy="60"
+                      fill="transparent"
+                      [attr.stroke]="s.color"
+                      stroke-width="14"
+                      [attr.stroke-dasharray]="donutDash(s.value, donutTotal(complianceDonut()), 314.159)"
+                      [attr.stroke-dashoffset]="donutOffset(complianceDonut(), i, donutTotal(complianceDonut()), 314.159)"
+                      transform="rotate(-90 60 60)"/>
+            </ng-container>
+            <text x="60" y="58" text-anchor="middle" class="donut-text-num">{{ fmt(complianceData.totalCompliances) }}</text>
+            <text x="60" y="74" text-anchor="middle" class="donut-text-lbl">records</text>
+          </svg>
+          <div class="legend">
+            <div class="legend-row" *ngFor="let s of complianceDonut()">
+              <span class="legend-dot" [style.background]="s.color"></span>
+              <span class="legend-lbl">{{ s.label }}</span>
+              <span class="legend-val">{{ fmt(s.value) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Citizen-friendly note -->
+    <div class="card info-card" *ngIf="role === 'Citizen' && !isLoading">
+      <i class="ti ti-info-circle"></i>
+      <div>
+        <div class="info-title">Public health snapshot</div>
+        <div class="info-sub">You're viewing outbreak & epidemiology trends compiled from authorised health workers. Patient-level data is never shown.</div>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,175 @@
+<div class="sh-page">
+
+  <!-- HEADER -->
+  <div class="sh-header">
+    <div class="header-inner">
+      <div class="header-main">
+        <div class="header-title-wrap">
+          <div class="page-badge">
+            <span class="live-dot"></span>Citizen Health Portal
+          </div>
+          <h1 class="header-h1">
+            <i class="ti ti-clipboard-list"></i>My Symptom Reports
+          </h1>
+          <p class="header-sub">
+            View and track all your previously submitted symptom reports
+          </p>
+        </div>
+        <div style="display:flex;gap:8px;align-self:center">
+          <button class="new-report-btn" (click)="navigateTo('/citizen-home')">
+            <i class="ti ti-home"></i>Dashboard
+          </button>
+          <button class="new-report-btn" (click)="navigateTo('/symptom-report')">
+            <i class="ti ti-plus"></i>New Report
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sh-body">
+
+    <!-- ACTIVE FILTER BAR -->
+    <div *ngIf="activeFilter" class="filter-bar">
+      <i class="ti ti-filter" style="color:#185FA5"></i>
+      Showing <strong>{{ activeFilter }}</strong> reports only
+      <button class="clear-filter-btn" (click)="navigateTo('/symptom-history')">
+        <i class="ti ti-x"></i> Clear filter
+      </button>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="errorMessage" class="err-box">
+      <i class="ti ti-alert-circle"></i>{{ errorMessage }}
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="isLoading" class="loading-wrap">
+      <div class="loading-card">
+        <div class="spinner"></div>
+        <p>Loading your reports...</p>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!isLoading && reports.length === 0 && !errorMessage" class="empty-state">
+      <div class="empty-icon-wrap">
+        <i class="ti ti-clipboard-list"></i>
+      </div>
+      <h3>No reports yet</h3>
+      <p>You haven't submitted any symptom reports. Start by creating your first report.</p>
+      <button class="outline-btn" (click)="navigateToReport()">
+        <i class="ti ti-plus"></i>Create First Report
+      </button>
+    </div>
+
+    <!-- REPORTS -->
+    <div *ngIf="!isLoading && reports.length > 0">
+
+      <!-- Summary bar -->
+      <div class="summary-bar">
+        <span class="summary-text">
+          Showing <strong>{{ startRecord }}–{{ endRecord }}</strong> of
+          <strong>{{ totalRecords }}</strong> reports
+        </span>
+        <span class="page-size-info">{{ pageSize }} per page</span>
+      </div>
+
+      <!-- Report cards -->
+      <div class="reports-list">
+        <div *ngFor="let r of reports; let i = index"
+             class="report-card"
+             [style.animation-delay]="(i * 0.05) + 's'">
+
+          <!-- Card header -->
+          <div class="card-header">
+            <div class="card-header-left">
+              <div class="report-number">#{{ r.reportId }}</div>
+              <div class="report-date">
+                <i class="ti ti-calendar"></i>
+                {{ r.date | date:'MMM d, yyyy' }}
+              </div>
+            </div>
+            <span [class]="getStatusClass(r.status)">
+              <i class="ti ti-circle"></i>{{ r.status }}
+            </span>
+          </div>
+
+          <!-- Symptoms -->
+          <div class="card-section" *ngIf="parsedSymptoms(r.symptomsJson).length > 0">
+            <div class="card-section-label">
+              <i class="ti ti-activity-heartbeat" style="color:#0F6E56"></i>
+              Symptoms
+            </div>
+            <div class="symptom-tags">
+              <span *ngFor="let s of parsedSymptoms(r.symptomsJson)" class="sym-tag">
+                {{ s }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Vitals -->
+          <div class="card-section" *ngIf="parsedVitals(r.symptomsJson)">
+            <div class="card-section-label">
+              <i class="ti ti-heart-rate-monitor" style="color:#993556"></i>
+              Vitals
+            </div>
+            <div class="vitals-text">{{ parsedVitals(r.symptomsJson) }}</div>
+          </div>
+
+          <!-- Notes -->
+          <div class="card-section" *ngIf="parsedNotes(r.symptomsJson)">
+            <div class="card-section-label">
+              <i class="ti ti-notes" style="color:#534AB7"></i>
+              Notes
+            </div>
+            <div class="notes-text">{{ parsedNotes(r.symptomsJson) }}</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="pagination-wrap" *ngIf="totalPages > 1">
+        <button class="page-btn nav-btn"
+                [disabled]="pageNumber === 1"
+                (click)="goToPage(pageNumber - 1)">
+          <i class="ti ti-chevron-left"></i>
+        </button>
+
+        <button class="page-btn"
+                *ngIf="pageNumber > 3"
+                (click)="goToPage(1)">
+          1
+        </button>
+
+        <span class="page-ellipsis" *ngIf="pageNumber > 4">...</span>
+
+        <button *ngFor="let p of pages"
+                class="page-btn"
+                [class.active]="p === pageNumber"
+                (click)="goToPage(p)">
+          {{ p }}
+        </button>
+
+        <span class="page-ellipsis" *ngIf="pageNumber < totalPages - 3">...</span>
+
+        <button class="page-btn"
+                *ngIf="pageNumber < totalPages - 2"
+                (click)="goToPage(totalPages)">
+          {{ totalPages }}
+        </button>
+
+        <button class="page-btn nav-btn"
+                [disabled]="pageNumber === totalPages"
+                (click)="goToPage(pageNumber + 1)">
+          <i class="ti ti-chevron-right"></i>
+        </button>
+
+        <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+      </div>
+
+    </div>
+
+  </div>
+</div>

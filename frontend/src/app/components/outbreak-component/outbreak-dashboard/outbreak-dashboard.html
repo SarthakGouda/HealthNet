@@ -1,0 +1,208 @@
+<div class="page">
+
+  <!-- ── Page Header ───────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div class="brand">
+        <div class="brand-logo"><i class="ti ti-virus"></i></div>
+        <div>
+          <h1 class="page-title">Outbreak Monitoring</h1>
+          <p class="page-subtitle">{{ roleSubtitle() }}</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <span class="page-badge">
+          <span class="live-dot"></span>
+          {{ roleLabel() }}
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- ── Loading ──────────────────────────────────────────────── -->
+    <div *ngIf="isLoading" class="card loading-card">
+      <span class="spinner"></span>
+      <span>Loading dashboard…</span>
+    </div>
+
+    <!-- ── Error ────────────────────────────────────────────────── -->
+    <div *ngIf="apiError && !isLoading" class="card error-card">
+      <i class="ti ti-alert-circle"></i>
+      <span>{{ apiError }}</span>
+    </div>
+
+    <!-- ── Delete success toast ─────────────────────────────────── -->
+    <div *ngIf="deleteSuccess" class="card success-card">
+      <i class="ti ti-circle-check"></i>
+      <span>{{ deleteSuccess }}</span>
+    </div>
+
+    <!-- ── KPI Stat Cards ───────────────────────────────────────── -->
+    <section *ngIf="!isLoading" class="stats-grid">
+      <div class="stat-card stat-blue">
+        <div class="stat-icon"><i class="ti ti-virus"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Total Outbreaks</div>
+          <div class="stat-value">{{ totalOutbreaks }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-amber">
+        <div class="stat-icon"><i class="ti ti-alert-triangle"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Active</div>
+          <div class="stat-value">{{ activeOutbreaks }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-teal">
+        <div class="stat-icon"><i class="ti ti-circle-check"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Resolved</div>
+          <div class="stat-value">{{ resolvedOutbreaks }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card stat-red">
+        <div class="stat-icon"><i class="ti ti-flame"></i></div>
+        <div class="stat-body">
+          <div class="stat-label">Critical (High)</div>
+          <div class="stat-value">{{ criticalOutbreaks }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Quick Actions (role-aware) ───────────────────────────── -->
+    <section *ngIf="!isLoading" class="card">
+      <div class="card-head">
+        <i class="ti ti-bolt"></i>
+        <span>Quick Actions</span>
+      </div>
+
+      <div class="action-grid">
+
+        <!-- Everyone authorized can view the full list -->
+        <button class="action-tile" (click)="goList()">
+          <span class="tile-icon icon-blue"><i class="ti ti-clipboard-list"></i></span>
+          <span class="tile-text">
+            <span class="tile-title">View All Outbreaks</span>
+            <span class="tile-sub">Browse and filter the full register</span>
+          </span>
+        </button>
+
+        <!-- Declare: Admin + PHO -->
+        <button *ngIf="canDeclare" class="action-tile" (click)="goDeclare()">
+          <span class="tile-icon icon-red"><i class="ti ti-plus"></i></span>
+          <span class="tile-text">
+            <span class="tile-title">Declare New Outbreak</span>
+            <span class="tile-sub">Record a new disease outbreak</span>
+          </span>
+        </button>
+
+        <!-- Doctor view-only hint -->
+        <div *ngIf="role === 'Doctor'" class="action-tile readonly">
+          <span class="tile-icon icon-teal"><i class="ti ti-eye"></i></span>
+          <span class="tile-text">
+            <span class="tile-title">Read-only Access</span>
+            <span class="tile-sub">Doctors can view outbreaks but cannot edit</span>
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Recent Outbreaks ─────────────────────────────────────── -->
+    <section *ngIf="!isLoading" class="card">
+      <div class="card-head between">
+        <span><i class="ti ti-history"></i> Recent Outbreaks</span>
+        <button class="btn-link" (click)="goList()">
+          View all <i class="ti ti-arrow-right"></i>
+        </button>
+      </div>
+
+      <div *ngIf="recentOutbreaks.length === 0" class="empty-state">
+        <i class="ti ti-info-circle"></i>
+        <span>No outbreaks recorded yet.</span>
+      </div>
+
+      <div *ngIf="recentOutbreaks.length > 0" class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Disease</th>
+              <th>Location</th>
+              <th>Severity</th>
+              <th>Start</th>
+              <th>End</th>
+              <th>Status</th>
+              <th *ngIf="canUpdate || canDelete" class="action-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of recentOutbreaks">
+              <td>
+                <button class="id-link-btn" (click)="goView(o.outbreakId)" title="View details">
+                  #{{ o.outbreakId }}
+                </button>
+              </td>
+              <td>{{ o.disease }}</td>
+              <td><i class="ti ti-map-pin"></i> {{ o.location }}</td>
+              <td>
+                <span class="badge" [ngClass]="getSeverityBadgeClass(o.severity)">
+                  {{ o.severity }}
+                </span>
+              </td>
+              <td>{{ formatDate(o.startDate) }}</td>
+              <td>{{ formatDate(o.endDate) }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusBadgeClass(o.status)">
+                  {{ o.status ? 'Active' : 'Closed' }}
+                </span>
+              </td>
+              <td *ngIf="canUpdate || canDelete" class="action-col">
+                <button *ngIf="canUpdate && o.status" class="row-btn btn-ghost" (click)="goEdit(o.outbreakId)">
+                  <i class="ti ti-edit"></i> Edit
+                </button>
+                <button *ngIf="canDelete" class="row-btn btn-danger" (click)="askDelete(o)">
+                  <i class="ti ti-trash"></i> Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ── Delete Confirmation Modal ──────────────────────────────── -->
+  <div *ngIf="confirmDelete" class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-icon"><i class="ti ti-alert-triangle"></i></div>
+      <h3 class="modal-title">Delete Outbreak?</h3>
+      <p class="modal-body">
+        You're about to delete <strong>{{ confirmDelete.disease }}</strong>
+        in <strong>{{ confirmDelete.location }}</strong>
+        (ID #{{ confirmDelete.outbreakId }}).
+        This action will close the outbreak and remove it from active records.
+      </p>
+
+      <div *ngIf="deleteError" class="modal-error">
+        <i class="ti ti-alert-circle"></i> {{ deleteError }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="cancelDelete()" [disabled]="isDeleting">
+          Cancel
+        </button>
+        <button class="btn btn-delete" (click)="doDelete()" [disabled]="isDeleting">
+          <span *ngIf="!isDeleting"><i class="ti ti-trash"></i> Delete</span>
+          <span *ngIf="isDeleting"><span class="spinner-sm"></span> Deleting…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,133 @@
+<!-- ── Desktop navbar ────────────────────────────────────────── -->
+<nav class="hn-nav fixed-top d-none d-lg-flex">
+  <div class="hn-nav-inner">
+
+    <!-- Brand -->
+    <a class="hn-brand" routerLink="/">
+      <span class="hn-brand-mark"><i class="ti ti-shield-check"></i></span>
+      <span class="hn-brand-name">{{ appName }}</span>
+    </a>
+
+    <!-- Links -->
+    <ul class="hn-links">
+      <li>
+        <a routerLink="/"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{ exact: true }">
+          <i class="ti ti-home"></i><span>Home</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/compliance" routerLinkActive="active">
+          <i class="ti ti-shield-check"></i><span>Compliance</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/outbreaks" routerLinkActive="active">
+          <i class="ti ti-virus"></i><span>Outbreaks</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/lab-tests" routerLinkActive="active">
+          <i class="ti ti-flask"></i><span>Labs</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/about" routerLinkActive="active">
+          <i class="ti ti-info-circle"></i><span>About</span>
+        </a>
+      </li>
+    </ul>
+
+    <!-- Right side actions -->
+    <div class="hn-actions">
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" class="hn-btn ghost">
+          <i class="ti ti-login-2"></i> Login
+        </a>
+        <a routerLink="/register" class="hn-btn primary">
+          <i class="ti ti-user-plus"></i> Sign up
+        </a>
+      </ng-container>
+
+      <div class="hn-profile" *ngIf="isLoggedIn" (click)="toggleMenu($event)">
+        <span class="hn-avatar" aria-label="Profile">
+          <i class="ti ti-user-circle"></i>
+        </span>
+        <i class="ti ti-chevron-down hn-caret"></i>
+
+        <div class="hn-dropdown" *ngIf="menuOpen">
+          <button type="button" (click)="goToProfile()">
+            <i class="ti ti-user"></i> Profile
+          </button>
+          <button type="button" (click)="logout()">
+            <i class="ti ti-logout"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ── Mobile navbar ─────────────────────────────────────────── -->
+<nav class="hn-nav-mobile fixed-top d-lg-none">
+  <button class="hn-burger" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-label="Open menu">
+    <i class="ti ti-menu-2"></i>
+  </button>
+  <a class="hn-brand" routerLink="/">
+    <span class="hn-brand-mark"><i class="ti ti-shield-check"></i></span>
+    <span class="hn-brand-name">{{ appName }}</span>
+  </a>
+  <span class="hn-spacer"></span>
+</nav>
+
+<!-- ── Mobile off-canvas drawer ──────────────────────────────── -->
+<div class="offcanvas offcanvas-start hn-drawer" tabindex="-1" id="mobileSidebar">
+  <div class="hn-drawer-head">
+    <div class="hn-brand">
+      <span class="hn-brand-mark"><i class="ti ti-shield-check"></i></span>
+      <span class="hn-brand-name">{{ appName }}</span>
+    </div>
+    <button type="button" class="hn-drawer-close" data-bs-dismiss="offcanvas" aria-label="Close">
+      <i class="ti ti-x"></i>
+    </button>
+  </div>
+
+  <nav class="hn-drawer-links">
+    <a routerLink="/"           routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" data-bs-dismiss="offcanvas">
+      <i class="ti ti-home"></i> Home
+    </a>
+    <a routerLink="/compliance" routerLinkActive="active" data-bs-dismiss="offcanvas">
+      <i class="ti ti-shield-check"></i> Compliance
+    </a>
+    <a routerLink="/outbreaks"  routerLinkActive="active" data-bs-dismiss="offcanvas">
+      <i class="ti ti-virus"></i> Outbreaks
+    </a>
+    <a routerLink="/lab-tests"  routerLinkActive="active" data-bs-dismiss="offcanvas">
+      <i class="ti ti-flask"></i> Labs
+    </a>
+    <a routerLink="/about"      routerLinkActive="active" data-bs-dismiss="offcanvas">
+      <i class="ti ti-info-circle"></i> About
+    </a>
+
+    <hr class="hn-drawer-sep" />
+
+    <ng-container *ngIf="!isLoggedIn">
+      <a routerLink="/login" class="hn-btn ghost w-100" data-bs-dismiss="offcanvas">
+        <i class="ti ti-login-2"></i> Login
+      </a>
+      <a routerLink="/register" class="hn-btn primary w-100" data-bs-dismiss="offcanvas">
+        <i class="ti ti-user-plus"></i> Sign up
+      </a>
+    </ng-container>
+
+    <ng-container *ngIf="isLoggedIn">
+      <a routerLink="/profile" class="hn-btn ghost w-100" data-bs-dismiss="offcanvas">
+        <i class="ti ti-user"></i> Profile
+      </a>
+      <button type="button" class="hn-btn danger w-100" (click)="logout()" data-bs-dismiss="offcanvas">
+        <i class="ti ti-logout"></i> Logout
+      </button>
+    </ng-container>
+  </nav>
+</div>

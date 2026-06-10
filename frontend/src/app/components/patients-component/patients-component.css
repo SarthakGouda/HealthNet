@@ -1,0 +1,10 @@
+/* Patient page — uses shared classes from src/styles.css.
+ * Only component-specific overrides live here. */
+
+@media (max-width: 768px) {
+  /* Hide DOB and Gender on small screens to keep the patient table compact */
+  .table-wrap table th:nth-child(3),
+  .table-wrap table td:nth-child(3),
+  .table-wrap table th:nth-child(4),
+  .table-wrap table td:nth-child(4) { display: none; }
+}

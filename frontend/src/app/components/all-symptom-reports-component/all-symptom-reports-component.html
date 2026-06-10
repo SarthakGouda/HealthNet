@@ -1,0 +1,76 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-clipboard-text"></i></div>
+        <div>
+          <div class="page-title">All Symptom Reports</div>
+          <div class="page-sub"><span class="dot"></span>All Citizens · HealthNet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Filters -->
+    <div class="card filter-card">
+      <div class="filter-row">
+        <div class="field-sm">
+          <label>Status Filter</label>
+          <select class="form-select" [(ngModel)]="selectedStatus" (change)="loadReports()">
+            <option value="">All Statuses</option>
+            <option value="Submitted">Submitted</option>
+            <option value="UnderReview">Under Review</option>
+            <option value="Reviewed">Reviewed</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+        <span class="count-badge">{{ totalRecords }} total</span>
+      </div>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading reports...</p></div>
+
+    <div class="card" *ngIf="!isLoading">
+      <div class="empty" *ngIf="reports.length === 0">
+        <i class="ti ti-clipboard-x"></i>
+        <div class="empty-title">No reports found</div>
+        <div class="empty-sub">Try adjusting your filter</div>
+      </div>
+      <div class="reports-list" *ngIf="reports.length > 0">
+        <div class="report-card" *ngFor="let r of reports">
+          <div class="rc-head">
+            <span class="rc-id">#{{ r.reportId }}</span>
+            <span class="rc-citizen">{{ r.citizenName || ('Citizen ' + r.citizenId) }}</span>
+            <span class="rc-date"><i class="ti ti-calendar"></i>{{ formatDate(r.date) }}</span>
+            <span class="badge" [ngClass]="getStatusClass(r.status)">{{ r.status }}</span>
+          </div>
+          <div class="rc-tags">
+            <span class="sym-tag" *ngFor="let s of parsedSymptoms(r.symptomsJson)">{{ s }}</span>
+          </div>
+          <div class="rc-actions" *ngIf="canChangeStatus">
+            <select class="status-select" [value]="r.status" (change)="updateStatus(r.reportId, $any($event.target).value)">
+              <option value="Submitted">Submitted</option>
+              <option value="UnderReview">Under Review</option>
+              <option value="Reviewed">Reviewed</option>
+              <option value="Closed">Closed</option>
+            </select>
+            <button class="row-btn btn-danger" (click)="deleteReport(r.reportId)">
+              <i class="ti ti-trash"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-wrap" *ngIf="totalPages > 1">
+        <button class="page-btn" [disabled]="pageNumber===1" (click)="goToPage(pageNumber-1)"><i class="ti ti-chevron-left"></i></button>
+        <button *ngFor="let p of pages" class="page-btn" [class.active]="p===pageNumber" (click)="goToPage(p)">{{ p }}</button>
+        <button class="page-btn" [disabled]="pageNumber===totalPages" (click)="goToPage(pageNumber+1)"><i class="ti ti-chevron-right"></i></button>
+        <span class="page-info">Page {{ pageNumber }} of {{ totalPages }}</span>
+      </div>
+    </div>
+  </div>
+</div>

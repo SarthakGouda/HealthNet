@@ -1,0 +1,163 @@
+<div class="auth-shell">
+
+  <!-- LEFT — brand panel -->
+  <aside class="auth-brand">
+    <div class="brand-inner">
+      <div class="brand-mark">
+        <img src="/assets/images/HealthNet-logo.png" alt="HealthNet" class="brand-logo" onerror="this.style.display='none'" />
+        <span class="brand-name">HealthNet</span>
+      </div>
+
+      <div class="brand-copy">
+        <div class="brand-eyebrow">
+          <i class="ti ti-sparkles"></i>
+          <span>Join the HealthNet network</span>
+        </div>
+        <h2>Create your account.<br/>Start contributing in minutes.</h2>
+        <p>Citizens report symptoms, clinicians manage cases, officers oversee outbreaks. Pick your role and we'll set you up.</p>
+
+        <ul class="brand-bullets">
+          <li><i class="ti ti-circle-check"></i>Secure JWT authentication</li>
+          <li><i class="ti ti-circle-check"></i>Role-based dashboards out of the box</li>
+          <li><i class="ti ti-circle-check"></i>Audit trail on every mutation</li>
+        </ul>
+      </div>
+
+      <div class="brand-foot">
+        <span>HealthNet · v2.0</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT — form -->
+  <main class="auth-main">
+    <div class="auth-card auth-card-wide">
+      <div class="auth-head">
+        <span class="auth-pill">Sign up</span>
+        <h1>Create your account</h1>
+        <p>Pick your role and fill in your details below.</p>
+      </div>
+
+      <form (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+
+        <div class="field-grid two">
+          <div class="field">
+            <label for="rgName">Full name</label>
+            <div class="input-wrap">
+              <i class="ti ti-user input-icon"></i>
+              <input id="rgName" type="text" class="input"
+                     placeholder="Your full name"
+                     [(ngModel)]="name" name="name" required />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="rgPhone">Phone</label>
+            <div class="input-wrap">
+              <i class="ti ti-device-mobile input-icon"></i>
+              <input id="rgPhone" type="tel" inputmode="numeric" maxlength="10" class="input"
+                     placeholder="10-digit number"
+                     [(ngModel)]="phoneNumber" name="phoneNumber"
+                     (ngModelChange)="onPhoneNumberChange()" required />
+            </div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rgEmail">Email</label>
+          <div class="input-wrap">
+            <i class="ti ti-mail input-icon"></i>
+            <input id="rgEmail" type="email" class="input"
+                   placeholder="name@email.com"
+                   autocomplete="email"
+                   [(ngModel)]="email" name="email" required />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rgRole">Role</label>
+          <div class="input-wrap">
+            <i class="ti ti-id-badge input-icon"></i>
+            <select id="rgRole" class="input select" [(ngModel)]="role" name="role" required>
+              <option value="" disabled>Select your role</option>
+              <option value="Citizen">Citizen</option>
+              <option value="Doctor">Doctor</option>
+              <option value="Lab Technician">Lab Technician</option>
+              <option value="Public Health Officer">Public Health Officer</option>
+              <option value="Researcher">Researcher</option>
+              <option value="Compliance Officer">Compliance Officer</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <i class="ti ti-chevron-down input-icon select-caret"></i>
+          </div>
+        </div>
+
+        <div class="field-grid two">
+          <div class="field">
+            <label for="rgPwd">Password</label>
+            <div class="input-wrap">
+              <i class="ti ti-lock input-icon"></i>
+              <input id="rgPwd"
+                     [type]="seePassword ? 'text' : 'password'"
+                     class="input pw"
+                     placeholder="Min 8 chars"
+                     autocomplete="new-password"
+                     [(ngModel)]="password" name="password"
+                     (ngModelChange)="onPasswordChange()" required />
+              <button type="button" class="eye" (click)="showPassword()" aria-label="Toggle password">
+                <i class="ti" [class.ti-eye]="!seePassword" [class.ti-eye-off]="seePassword"></i>
+              </button>
+            </div>
+            <small class="strength"
+                   [class.weak]="password && !isStrongPassword"
+                   [class.strong]="isStrongPassword">
+              <i class="ti" [class.ti-shield-off]="password && !isStrongPassword" [class.ti-shield-check]="isStrongPassword"></i>
+              <ng-container *ngIf="!password">Need 8+ chars, upper, lower, digit, special.</ng-container>
+              <ng-container *ngIf="password && !isStrongPassword">Add uppercase, lowercase, digit and special char.</ng-container>
+              <ng-container *ngIf="isStrongPassword">Strong password.</ng-container>
+            </small>
+          </div>
+
+          <div class="field">
+            <label for="rgConfirm">Confirm password</label>
+            <div class="input-wrap">
+              <i class="ti ti-lock-check input-icon"></i>
+              <input id="rgConfirm"
+                     [type]="seeConfirmPassword ? 'text' : 'password'"
+                     class="input pw"
+                     placeholder="Re-type password"
+                     autocomplete="new-password"
+                     [(ngModel)]="confirmPassword" name="confirmPassword"
+                     (ngModelChange)="onConfirmPasswordChange()" required />
+              <button type="button" class="eye" (click)="showConfirmPassword()" aria-label="Toggle password">
+                <i class="ti" [class.ti-eye]="!seeConfirmPassword" [class.ti-eye-off]="seeConfirmPassword"></i>
+              </button>
+            </div>
+            <small class="strength weak" *ngIf="confirmPassword && !passwordMatch">
+              <i class="ti ti-alert-circle"></i> Passwords don't match.
+            </small>
+          </div>
+        </div>
+
+        <div *ngIf="errMsg" class="auth-err">
+          <i class="ti ti-alert-circle"></i>{{ errMsg }}
+        </div>
+
+        <button type="submit" class="auth-submit" [disabled]="isSubmitting">
+          <span *ngIf="isSubmitting" class="spinner-sm"></span>
+          <i *ngIf="!isSubmitting" class="ti ti-user-plus"></i>
+          {{ isSubmitting ? 'Creating account...' : 'Create account' }}
+        </button>
+
+        <p class="legal">
+          By creating an account you agree to HealthNet's acceptable-use guidelines.
+        </p>
+
+        <p class="login-link">
+          Already have an account?
+          <a routerLink="/login">Sign in</a>
+        </p>
+      </form>
+    </div>
+  </main>
+</div>

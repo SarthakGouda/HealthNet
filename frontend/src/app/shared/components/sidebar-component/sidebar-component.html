@@ -1,0 +1,43 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+
+  <!-- Brand header -->
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <i class="ti ti-activity-heartbeat"></i>
+    </div>
+    <span class="brand-name" *ngIf="!isCollapsed">HealthNet</span>
+    <button class="collapse-btn" (click)="toggleCollapse()" [title]="isCollapsed ? 'Expand' : 'Collapse'">
+      <i class="ti" [ngClass]="isCollapsed ? 'ti-chevron-right' : 'ti-chevron-left'"></i>
+    </button>
+  </div>
+
+  <!-- Role badge -->
+  <div class="role-badge" *ngIf="!isCollapsed" [style.background]="getRoleBg()" [style.color]="getRoleColor()">
+    <i class="ti ti-shield-half-filled"></i>
+    {{ role }}
+  </div>
+
+  <!-- Nav items -->
+  <nav class="sidebar-nav">
+    <a *ngFor="let item of navItems"
+       class="nav-item"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       [title]="isCollapsed ? item.label : ''">
+      <i class="ti" [ngClass]="item.icon"></i>
+      <span class="nav-label" *ngIf="!isCollapsed">{{ item.label }}</span>
+    </a>
+  </nav>
+
+  <!-- Bottom -->
+  <div class="sidebar-bottom">
+    <a class="nav-item" routerLink="/profile" routerLinkActive="active" [title]="isCollapsed ? 'Profile' : ''">
+      <i class="ti ti-user-circle"></i>
+      <span class="nav-label" *ngIf="!isCollapsed">Profile</span>
+    </a>
+    <button class="nav-item logout-btn" (click)="logout()" [title]="isCollapsed ? 'Logout' : ''">
+      <i class="ti ti-logout"></i>
+      <span class="nav-label" *ngIf="!isCollapsed">Logout</span>
+    </button>
+  </div>
+</div>

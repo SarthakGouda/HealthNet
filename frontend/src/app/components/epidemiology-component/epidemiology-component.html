@@ -1,0 +1,185 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-microscope"></i></div>
+        <div>
+          <div class="page-title">Epidemiology Metrics</div>
+          <div class="page-sub"><span class="dot"></span>Outbreak surveillance · HealthNet</div>
+        </div>
+      </div>
+      <button class="btn-create" *ngIf="canMutate" (click)="openCreate()">
+        <i class="ti ti-plus"></i> Create Epidemiology
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Create form -->
+    <div class="card form-card" *ngIf="showForm">
+      <div class="card-head"><i class="ti ti-plus"></i> New Epidemiology Record</div>
+      <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Outbreak *</label>
+            <select formControlName="outbreakId" class="form-select">
+              <option [ngValue]="null">Select active outbreak</option>
+              <option *ngFor="let o of outbreaks" [ngValue]="o.outbreakId">{{ outbreakLabel(o.outbreakId) }}</option>
+            </select>
+            <small class="hint-err" *ngIf="createForm.get('outbreakId')?.touched && createForm.get('outbreakId')?.invalid">Pick the outbreak this record belongs to.</small>
+          </div>
+          <div class="field">
+            <label>Date *</label>
+            <input type="date" formControlName="date" [max]="todayISO" class="form-control" />
+            <small class="hint-err" *ngIf="createForm.get('date')?.touched && createForm.get('date')?.invalid">Date is required.</small>
+          </div>
+        </div>
+
+        <div class="form-row metrics-row">
+          <div class="field">
+            <label>Cases *</label>
+            <input type="number" min="0" step="1" formControlName="cases" class="form-control" placeholder="e.g. 124" />
+            <small class="hint-err" *ngIf="createForm.get('cases')?.touched && createForm.get('cases')?.invalid">Required (0 or more).</small>
+          </div>
+          <div class="field">
+            <label>Recoveries *</label>
+            <input type="number" min="0" step="1" formControlName="recoveries" class="form-control" placeholder="e.g. 80" />
+            <small class="hint-err" *ngIf="createForm.get('recoveries')?.touched && createForm.get('recoveries')?.invalid">Required (0 or more).</small>
+          </div>
+          <div class="field">
+            <label>Rt (now) *</label>
+            <input type="number" min="0" step="0.01" formControlName="RtNow" class="form-control" placeholder="e.g. 1.23" />
+            <small class="hint-err" *ngIf="createForm.get('RtNow')?.touched && createForm.get('RtNow')?.invalid">Required (0 or more).</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Create' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="showForm = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit form -->
+    <div class="card form-card" *ngIf="editingId">
+      <div class="card-head"><i class="ti ti-edit"></i> Update Epidemiology #{{ editingId }}</div>
+      <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Date *</label>
+            <input type="date" formControlName="date" [max]="todayISO" class="form-control" />
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <select formControlName="status" class="form-select">
+              <option [ngValue]="true">Active / Monitoring</option>
+              <option [ngValue]="false">Inactive</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row metrics-row">
+          <div class="field">
+            <label>Cases *</label>
+            <input type="number" min="0" step="1" formControlName="cases" class="form-control" />
+            <small class="hint-err" *ngIf="editForm.get('cases')?.touched && editForm.get('cases')?.invalid">Required (0 or more).</small>
+          </div>
+          <div class="field">
+            <label>Recoveries *</label>
+            <input type="number" min="0" step="1" formControlName="recoveries" class="form-control" />
+            <small class="hint-err" *ngIf="editForm.get('recoveries')?.touched && editForm.get('recoveries')?.invalid">Required (0 or more).</small>
+          </div>
+          <div class="field">
+            <label>Rt (now) *</label>
+            <input type="number" min="0" step="0.01" formControlName="RtNow" class="form-control" />
+            <small class="hint-err" *ngIf="editForm.get('RtNow')?.touched && editForm.get('RtNow')?.invalid">Required (0 or more).</small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting"><i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Save Changes' }}</button>
+          <button type="button" class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="card search-card">
+      <div class="search-row">
+        <div class="search-wrap">
+          <i class="ti ti-search search-ico"></i>
+          <input class="search-input" placeholder="Search disease, location, notes..." [(ngModel)]="search" (input)="applyFilters()" />
+        </div>
+        <select class="form-select" [(ngModel)]="outbreakFilter" (change)="applyFilters()">
+          <option value="">All outbreaks</option>
+          <option *ngFor="let o of outbreaks" [ngValue]="o.outbreakId">{{ outbreakLabel(o.outbreakId) }}</option>
+        </select>
+        <select class="form-select" [(ngModel)]="statusFilter" (change)="applyFilters()">
+          <option value="">All status</option>
+          <option value="Active">Monitoring</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <button class="btn-ghost" (click)="resetFilters()"><i class="ti ti-x"></i> Clear</button>
+        <span class="count-badge">{{ filtered.length }} records</span>
+      </div>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading...</p></div>
+
+    <div class="card" *ngIf="!isLoading">
+      <div class="empty" *ngIf="filtered.length === 0">
+        <i class="ti ti-microscope"></i>
+        <div class="empty-title">No epidemiology records yet</div>
+        <div class="empty-sub">Create one against an active outbreak to start tracking metrics</div>
+      </div>
+      <div class="table-wrap" *ngIf="filtered.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th><th>Outbreak</th><th>Date</th><th>Metrics</th><th>Status</th><th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of filtered">
+              <td class="id-cell">#{{ r.epiId }}</td>
+              <td>{{ outbreakLabel(r.outbreakId) }}</td>
+              <td>{{ formatDate(r.date) }}</td>
+              <td class="metrics-cell">{{ metricsPreview(r.metricsJSON) }}</td>
+              <td><span class="badge" [ngClass]="badge(r.status)">{{ label(r.status) }}</span></td>
+              <td>
+                <button class="row-btn btn-info" (click)="view(r.epiId)" title="View"><i class="ti ti-eye"></i></button>
+                <button class="row-btn btn-warning" *ngIf="canMutate" (click)="startEdit(r)" title="Edit"><i class="ti ti-edit"></i></button>
+                <button class="row-btn btn-danger" *ngIf="canMutate" (click)="remove(r)" title="Delete"><i class="ti ti-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detail modal -->
+    <div class="modal-backdrop" *ngIf="detail" (click)="closeDetail()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div><i class="ti ti-microscope"></i> Epidemiology #{{ detail.epiId }}</div>
+          <button class="icon-btn" (click)="closeDetail()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="kv"><span>Outbreak</span><b>{{ outbreakLabel(detail.outbreakId) }}</b></div>
+          <div class="kv"><span>Date</span><b>{{ formatDate(detail.date) }}</b></div>
+          <div class="kv"><span>Status</span><b><span class="badge" [ngClass]="badge(detail.status)">{{ label(detail.status) }}</span></b></div>
+          <ng-container *ngIf="parseMetrics(detail.metricsJSON) as m">
+            <div class="kv"><span>Cases</span><b>{{ m.cases ?? '—' }}</b></div>
+            <div class="kv"><span>Recoveries</span><b>{{ m.recoveries ?? '—' }}</b></div>
+            <div class="kv"><span>Rt (now)</span><b>{{ m.RtNow ?? '—' }}</b></div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

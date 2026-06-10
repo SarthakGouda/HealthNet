@@ -1,0 +1,155 @@
+<div class="pf-page">
+
+  <div class="pf-wrap">
+
+    <!-- ── Banner ────────────────────────────────────────────── -->
+    <div class="pf-banner"
+         [style.background]="'linear-gradient(135deg,' + roleColor.from + ',' + roleColor.to + ')'">
+      <div class="pf-banner-pattern"></div>
+      <div class="pf-banner-inner">
+        <div class="pf-avatar" [style.color]="roleColor.chip">
+          <ng-container *ngIf="!isLoading; else avatarSkeleton">{{ initials }}</ng-container>
+          <ng-template #avatarSkeleton><span class="pf-skel pf-skel-circle"></span></ng-template>
+        </div>
+        <div class="pf-banner-text">
+          <div class="pf-role-chip">
+            <i class="ti" [ngClass]="roleIcon"></i>
+            <span>{{ user.RoleName || '—' }}</span>
+          </div>
+          <h1 class="pf-name">
+            <ng-container *ngIf="!isLoading; else nameSkeleton">{{ user.Name || 'My profile' }}</ng-container>
+            <ng-template #nameSkeleton><span class="pf-skel pf-skel-line w-60"></span></ng-template>
+          </h1>
+          <div class="pf-sub">
+            <ng-container *ngIf="!isLoading; else subSkeleton">{{ joinedLabel }}</ng-container>
+            <ng-template #subSkeleton><span class="pf-skel pf-skel-line w-30"></span></ng-template>
+          </div>
+        </div>
+        <div class="pf-banner-actions">
+          <button class="pf-btn ghost" (click)="logout()"><i class="ti ti-logout"></i> Log out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Error ─────────────────────────────────────────────── -->
+    <div *ngIf="errMsg" class="pf-error"><i class="ti ti-alert-circle"></i>{{ errMsg }}</div>
+
+    <!-- ── Body ──────────────────────────────────────────────── -->
+    <div class="pf-grid">
+
+      <!-- About card -->
+      <section class="pf-card pf-about">
+        <div class="pf-card-head">
+          <i class="ti ti-user-circle"></i>
+          <span>About</span>
+        </div>
+        <dl class="pf-kv">
+          <div class="row">
+            <dt><i class="ti ti-mail"></i>Email</dt>
+            <dd>{{ user.Email || '—' }}</dd>
+          </div>
+          <div class="row">
+            <dt><i class="ti ti-device-mobile"></i>Phone</dt>
+            <dd>{{ user.Phone || '—' }}</dd>
+          </div>
+          <div class="row">
+            <dt><i class="ti ti-id-badge"></i>Role</dt>
+            <dd>
+              <span class="pf-pill"
+                    [style.background]="roleColor.tint"
+                    [style.color]="roleColor.chip">
+                <i class="ti" [ngClass]="roleIcon"></i>{{ user.RoleName || '—' }}
+              </span>
+            </dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- Actions card -->
+      <section class="pf-card pf-actions-card">
+        <div class="pf-card-head">
+          <i class="ti ti-bolt"></i>
+          <span>Quick actions</span>
+        </div>
+        <div class="pf-action" *ngIf="isAdmin()">
+          <div class="pf-action-icon" style="background:#FAEEDA;color:#854F0B;">
+            <i class="ti ti-edit"></i>
+          </div>
+          <div class="pf-action-text">
+            <div class="t">Update account</div>
+            <div class="s">Change your name, email, phone or role.</div>
+          </div>
+          <button class="pf-btn outline" (click)="goUpdate()">
+            <i class="ti ti-arrow-right"></i>
+          </button>
+        </div>
+        <div class="pf-action" *ngIf="isAdmin()">
+          <div class="pf-action-icon" style="background:#FCEBEB;color:#791F1F;">
+            <i class="ti ti-user-off"></i>
+          </div>
+          <div class="pf-action-text">
+            <div class="t">Deactivate users</div>
+            <div class="s">Soft-delete an account as an administrator.</div>
+          </div>
+          <button class="pf-btn danger" (click)="goDelete()">
+            <i class="ti ti-arrow-right"></i>
+          </button>
+        </div>
+
+        <a class="pf-action link" routerLink="/forgot-password">
+          <div class="pf-action-icon" style="background:#EEEDFE;color:#533AB7;">
+            <i class="ti ti-key"></i>
+          </div>
+          <div class="pf-action-text">
+            <div class="t">Reset password</div>
+            <div class="s">Set a new password from the forgot-password flow.</div>
+          </div>
+          <i class="ti ti-chevron-right pf-chev"></i>
+        </a>
+
+        <a class="pf-action link" routerLink="/analytics">
+          <div class="pf-action-icon" style="background:#E6F1FB;color:#185FA5;">
+            <i class="ti ti-chart-bar"></i>
+          </div>
+          <div class="pf-action-text">
+            <div class="t">Open analytics</div>
+            <div class="s">Public-health dashboards and insights.</div>
+          </div>
+          <i class="ti ti-chevron-right pf-chev"></i>
+        </a>
+      </section>
+
+      <!-- Security card -->
+      <section class="pf-card pf-security">
+        <div class="pf-card-head">
+          <i class="ti ti-shield-lock"></i>
+          <span>Security &amp; access</span>
+        </div>
+        <ul class="pf-list">
+          <li>
+            <i class="ti ti-circle-check"></i>
+            <div>
+              <div class="t">JWT session active</div>
+              <div class="s">Token stored in your browser session and expires automatically.</div>
+            </div>
+          </li>
+          <li>
+            <i class="ti ti-circle-check"></i>
+            <div>
+              <div class="t">Role-based access</div>
+              <div class="s">You see what your role allows — server-enforced on every request.</div>
+            </div>
+          </li>
+          <li>
+            <i class="ti ti-info-circle"></i>
+            <div>
+              <div class="t">Need help?</div>
+              <div class="s">Contact your HealthNet administrator to change role or permissions.</div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+</div>

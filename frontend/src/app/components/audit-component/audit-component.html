@@ -1,0 +1,154 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-clipboard-check"></i></div>
+        <div>
+          <div class="page-title">Audit Records</div>
+          <div class="page-sub"><span class="dot"></span>Compliance & Public Health · HealthNet</div>
+        </div>
+      </div>
+      <button class="btn-create" (click)="showCreate = !showCreate; editingId = null">
+        <i class="ti ti-plus"></i> {{ showCreate ? 'Cancel' : 'Create Audit' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Create -->
+    <div class="card form-card" *ngIf="showCreate">
+      <div class="card-head"><i class="ti ti-plus"></i> Create Audit</div>
+      <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="reg-form">
+        <div class="field full">
+          <label>Scope *</label>
+          <input formControlName="scope" class="form-control" placeholder="What area is being audited?" />
+        </div>
+        <div class="field full">
+          <label>Findings *</label>
+          <textarea formControlName="findings" rows="3" class="form-control" placeholder="What was found during the audit?"></textarea>
+        </div>
+        <div class="field">
+          <label>Initial Status</label>
+          <select formControlName="status" class="form-select">
+            <option [ngValue]="true">Open</option>
+            <option [ngValue]="false">Closed</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Create Audit' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="showCreate = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit -->
+    <div class="card form-card" *ngIf="editingId">
+      <div class="card-head"><i class="ti ti-edit"></i> Update Audit #{{ editingId }}</div>
+      <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="reg-form">
+        <div class="field full">
+          <label>Scope *</label>
+          <input formControlName="scope" class="form-control" />
+        </div>
+        <div class="field full">
+          <label>Findings *</label>
+          <textarea formControlName="findings" rows="3" class="form-control"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters -->
+    <div class="card filter-card">
+      <form [formGroup]="filterForm" (ngSubmit)="load()" class="filter-row">
+        <div class="field-sm">
+          <label>Audit ID</label>
+          <input type="number" min="1" formControlName="auditId" class="form-control" />
+        </div>
+        <div class="field-sm">
+          <label>Officer ID</label>
+          <input type="number" min="1" formControlName="officerId" class="form-control" />
+        </div>
+        <div class="field-sm wide">
+          <label>Scope</label>
+          <input formControlName="scope" class="form-control" placeholder="Contains..." />
+        </div>
+        <div class="field-sm wide">
+          <label>Findings</label>
+          <input formControlName="findings" class="form-control" placeholder="Contains..." />
+        </div>
+        <div class="field-sm">
+          <label>Date</label>
+          <input type="date" formControlName="date" class="form-control" />
+        </div>
+        <button type="submit" class="btn-primary"><i class="ti ti-filter"></i> Filter</button>
+        <button type="button" class="btn-ghost" (click)="clearFilters()"><i class="ti ti-x"></i> Clear</button>
+        <span class="count-badge">{{ audits.length }} audits</span>
+      </form>
+      <div class="filter-row">
+        <form [formGroup]="getByIdForm" (ngSubmit)="onGetById()" class="inline-form">
+          <label class="hint">Lookup by Audit ID</label>
+          <input type="number" min="1" formControlName="auditId" class="form-control" placeholder="e.g. 5" />
+          <button class="btn-ghost" type="submit"><i class="ti ti-search"></i> Get</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading audits...</p></div>
+
+    <div class="card" *ngIf="!isLoading">
+      <div class="empty" *ngIf="audits.length === 0">
+        <i class="ti ti-clipboard-off"></i>
+        <div class="empty-title">No audits found</div>
+        <div class="empty-sub">Create your first audit to get started</div>
+      </div>
+      <div class="table-wrap" *ngIf="audits.length > 0">
+        <table>
+          <thead><tr><th>ID</th><th>Officer</th><th>Scope</th><th>Findings</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let a of audits">
+              <td class="id-cell">#{{ a.auditId }}</td>
+              <td>#{{ a.officerId }}<span *ngIf="a.officerName"> · {{ a.officerName }}</span></td>
+              <td class="ellip">{{ a.scope }}</td>
+              <td class="ellip">{{ a.findings }}</td>
+              <td>{{ formatDate(a.date) }}</td>
+              <td><span class="badge" [ngClass]="statusClass(a.status)">{{ statusLabel(a.status) }}</span></td>
+              <td>
+                <button class="row-btn btn-info" (click)="view(a.auditId)" title="View"><i class="ti ti-eye"></i></button>
+                <button class="row-btn btn-warning" *ngIf="a.status" (click)="startEdit(a)" title="Edit"><i class="ti ti-edit"></i></button>
+                <button class="row-btn btn-success" *ngIf="a.status" (click)="closeAudit(a.auditId)" title="Close audit"><i class="ti ti-lock"></i></button>
+                <button class="row-btn btn-danger" (click)="remove(a.auditId)" title="Delete"><i class="ti ti-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Detail modal -->
+    <div class="modal-backdrop" *ngIf="detail" (click)="closeDetail()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div><i class="ti ti-clipboard-check"></i> Audit #{{ detail.auditId }}</div>
+          <button class="icon-btn" (click)="closeDetail()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="kv"><span>Officer</span><b>#{{ detail.officerId }}<span *ngIf="detail.officerName"> · {{ detail.officerName }}</span></b></div>
+          <div class="kv"><span>Date</span><b>{{ formatDate(detail.date) }}</b></div>
+          <div class="kv"><span>Status</span><b><span class="badge" [ngClass]="statusClass(detail.status)">{{ statusLabel(detail.status) }}</span></b></div>
+          <div class="kv stacked"><span>Scope</span><b>{{ detail.scope }}</b></div>
+          <div class="kv stacked"><span>Findings</span><b>{{ detail.findings }}</b></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

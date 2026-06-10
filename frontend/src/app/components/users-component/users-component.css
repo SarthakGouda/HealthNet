@@ -1,0 +1,32 @@
+/* User management — uses shared classes from src/styles.css.
+ * Only component-specific overrides live here. */
+
+.btn-purple { background: #EEEDFE; color: #3C3489; margin-right: 4px; }
+.btn-purple:hover { background: #d6d3fb; }
+
+.count-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 500;
+  padding: 4px 10px; border-radius: 999px;
+  white-space: nowrap;
+}
+.count-active   { background: #E1F5EE; color: #085041; }
+.count-inactive { background: #FCEBEB; color: #791F1F; transition: background .15s; }
+.count-inactive:hover { background: #f7c1c1; }
+
+.muted-line { margin: 0 0 14px; font-size: 13px; color: #4a5568; }
+
+.pw-wrap { position: relative; }
+.pw-wrap .form-control { padding-right: 40px; }
+.eye-btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: transparent; border: none; cursor: pointer;
+  color: #94a3b8; font-size: 16px; padding: 5px; border-radius: 5px;
+}
+.eye-btn:hover { color: #185FA5; background: #f1f6fc; }
+
+@media (max-width: 768px) {
+  /* Hide phone on small screens */
+  .table-wrap table th:nth-child(4),
+  .table-wrap table td:nth-child(4) { display: none; }
+}

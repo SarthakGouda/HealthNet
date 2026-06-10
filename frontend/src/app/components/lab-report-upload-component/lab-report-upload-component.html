@@ -1,0 +1,88 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-upload"></i></div>
+        <div>
+          <div class="page-title">Upload Lab Report</div>
+          <div class="page-sub"><span class="dot"></span>Lab Technician · HealthNet</div>
+        </div>
+      </div>
+      <a class="btn-create" routerLink="/lab-tests/my-assignments"><i class="ti ti-clipboard-data"></i> My Assignments</a>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar">
+      <i class="ti ti-circle-check"></i>{{ success }}
+      <a *ngIf="uploadedFileURI" [href]="uploadedFileURI" target="_blank" class="link">View report</a>
+    </div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <div class="grid">
+      <div class="card form-card">
+        <div class="card-head"><i class="ti ti-file-upload"></i> Upload form</div>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="reg-form">
+          <div class="field">
+            <label>Lab Test *</label>
+            <app-id-picker
+              [options]="testOptions$ | async"
+              placeholder="Pick a pending test…"
+              emptyText="No pending tests assigned to you"
+              formControlName="testId">
+            </app-id-picker>
+            <small class="hint-err" *ngIf="form.get('testId')?.touched && form.get('testId')?.invalid">Select a test to upload the report for.</small>
+          </div>
+
+          <div class="field">
+            <label>Report File *</label>
+            <div class="drop-area" [class.has-file]="file">
+              <input type="file" id="reportFile" [accept]="acceptTypes" (change)="onFileSelected($event)" />
+              <label for="reportFile" class="drop-label" *ngIf="!file">
+                <i class="ti ti-cloud-upload"></i>
+                <span>Click to select file</span>
+                <small>PDF, JPG, PNG, DOC up to 10 MB</small>
+              </label>
+              <div class="file-preview" *ngIf="file">
+                <i class="ti ti-file"></i>
+                <div class="file-meta">
+                  <div class="file-name">{{ fileName }}</div>
+                  <div class="file-size">{{ fileSize }}</div>
+                </div>
+                <button type="button" class="btn-ghost icon-x" (click)="clearFile()" aria-label="Remove">
+                  <i class="ti ti-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" [disabled]="isSubmitting || !file">
+              <span *ngIf="isSubmitting" class="spinner-sm"></span>
+              <i *ngIf="!isSubmitting" class="ti ti-upload"></i>
+              {{ isSubmitting ? 'Uploading...' : 'Upload Report' }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><i class="ti ti-clipboard-data"></i> My pending tests</div>
+        <div class="loading-wrap" *ngIf="isLoadingTests"><div class="spinner"></div><p class="muted">Loading...</p></div>
+        <div class="empty" *ngIf="!isLoadingTests && myTests.length === 0">
+          <i class="ti ti-checkup-list"></i>
+          <div class="empty-title">No pending tests assigned to you</div>
+        </div>
+        <ul class="pick-list" *ngIf="myTests.length > 0">
+          <li *ngFor="let t of myTests" (click)="pickTest(t)" tabindex="0">
+            <div class="pick-info">
+              <div class="pick-title"><strong>Test #{{ t.testId }}</strong> · {{ t.type }}</div>
+              <div class="pick-sub">Patient #{{ t.patientId }} · {{ t.date | date:'dd/MM/yyyy' }}</div>
+            </div>
+            <span class="badge badge-pending">Pending</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

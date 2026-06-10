@@ -1,0 +1,17 @@
+/* Layout wrapper: header is fixed-top (var(--hn-nav-h)), this shell takes
+   the remaining viewport height. */
+.app-body {
+  display: flex;
+  min-height: calc(100vh - var(--hn-nav-h, 60px));
+}
+
+.app-body.with-sidebar .app-main {
+  flex: 1;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+}

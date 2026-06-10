@@ -1,0 +1,52 @@
+/* Lab report upload — amber lab-tech palette overrides on top of shared styles. */
+
+.page         { background: #fff7ee; }
+.page-header  { background: linear-gradient(135deg, #854F0B, #B96E0E); }
+.page-sub .dot { background: #fff; }
+.card         { border-color: #F1D7AF; }
+.form-card    { border-color: #F1D7AF; }
+.card-head    { color: #854F0B; }
+
+.form-control { border-color: #F1D7AF; }
+.form-control:focus { border-color: #854F0B; box-shadow: 0 0 0 3px rgba(133,79,11,.1); }
+
+.btn-primary  { background: #854F0B; }
+.btn-primary:hover { background: #6F410A; }
+.btn-ghost    { color: #7B5524; border-color: #F1D7AF; }
+.btn-ghost:hover { background: #FFFBF5; }
+
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.drop-area {
+  border: 2px dashed #F1D7AF; border-radius: 12px; padding: 24px;
+  text-align: center; position: relative;
+  background: #FFFBF5; transition: border .15s, background .15s;
+}
+.drop-area.has-file { border-style: solid; background: #FFF8EC; }
+.drop-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.drop-label { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #854F0B; cursor: pointer; }
+.drop-label i { font-size: 34px; }
+.drop-label small { color: #A07238; font-size: 11px; }
+
+.file-preview { display: flex; align-items: center; gap: 12px; }
+.file-preview > i { font-size: 28px; color: #854F0B; }
+.file-meta { flex: 1; text-align: left; }
+.file-name { font-weight: 500; color: #3a2710; font-size: 13px; word-break: break-all; }
+.file-size { font-size: 11px; color: #A07238; }
+.icon-x { padding: 6px 8px; }
+
+.pick-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.pick-list li {
+  border: 1px solid #F1D7AF; border-radius: 10px; padding: 10px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; background: #FFFBF5;
+  transition: background .15s, border-color .15s;
+}
+.pick-list li:hover, .pick-list li:focus { background: #FFF1D8; border-color: #B96E0E; outline: none; }
+.pick-info  { display: flex; flex-direction: column; gap: 2px; }
+.pick-title { font-size: 13px; color: #3a2710; }
+.pick-sub   { font-size: 11px; color: #A07238; }
+
+.link { color: #085041; text-decoration: underline; font-weight: 500; }
+
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }

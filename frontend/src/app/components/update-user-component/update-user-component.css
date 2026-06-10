@@ -1,0 +1,61 @@
+/* Update User — Bootstrap-themed template, HealthNet branding applied via overrides. */
+
+:host { display: block; background: var(--hn-bg-page, #f0f7ff); min-height: calc(100vh - var(--hn-nav-h, 60px)); }
+:host .container-fluid { padding-top: 32px; padding-bottom: 32px; }
+
+:host .card {
+  border: 1px solid var(--hn-border-soft, #B5D4F4) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 20px 50px rgba(12, 68, 124, 0.08) !important;
+  overflow: hidden;
+}
+:host .card-header.bg-primary {
+  background: linear-gradient(135deg, var(--hn-primary-dark, #0C447C), var(--hn-primary, #185FA5)) !important;
+  border-bottom: none;
+}
+:host .card-header h4 {
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+
+:host .form-label { color: #4a5568; font-size: 13px; }
+
+:host .form-control,
+:host .form-select {
+  border-radius: 10px;
+  border: 1px solid #d7e3f1;
+  font-size: 14px;
+  padding: 10px 12px;
+  transition: border .15s, box-shadow .15s;
+}
+:host .form-control:focus,
+:host .form-select:focus {
+  border-color: var(--hn-primary, #185FA5);
+  box-shadow: 0 0 0 4px rgba(24, 95, 165, .1);
+}
+
+:host .btn-primary {
+  background: linear-gradient(135deg, var(--hn-primary-dark, #0C447C), var(--hn-primary, #185FA5)) !important;
+  border: none !important;
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 10px 18px;
+  transition: transform .15s, box-shadow .15s;
+}
+:host .btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(12, 68, 124, .22);
+}
+
+:host .btn-outline-secondary {
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-color: #d7e3f1;
+  color: var(--hn-text-muted, #718096);
+}
+:host .btn-outline-secondary:hover {
+  background: var(--hn-primary-soft, #E6F1FB);
+  color: var(--hn-primary-dark, #0C447C);
+  border-color: var(--hn-border-soft, #B5D4F4);
+}

@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap');
+*{box-sizing:border-box;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.dh-page{background:linear-gradient(135deg,#e8f4fd 0%,#deeef9 40%,#e6f1fb 100%);min-height:100vh;font-family:'Inter',sans-serif;background-size:200% 200%;animation:gradShift 10s ease infinite;}
+.dh-header{background:linear-gradient(135deg,#0C447C 0%,#185FA5 60%,#378ADD 100%);padding:24px 28px;}
+.dh-header-inner{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.dh-left{}
+.page-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,.8);margin-bottom:8px;}
+.live-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:blink 1.5s infinite;display:inline-block;}
+.dh-title{font-size:24px;font-weight:600;color:#fff;margin:0 0 4px;}
+.dh-sub{font-size:13px;color:rgba(255,255,255,.6);margin:0;}
+.role-icon-wrap{width:64px;height:64px;background:rgba(255,255,255,.12);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;color:rgba(255,255,255,.9);}
+.dh-body{padding:24px 28px;max-width:1100px;margin:0 auto;}
+.sec-title-row{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;color:#1a202c;margin-bottom:14px;}
+.actions-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.action-tile{background:rgba(255,255,255,.88);border:1px solid rgba(181,212,244,.6);border-radius:14px;padding:18px 16px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:6px;transition:all .2s;animation:fadeUp .35s ease both;font-family:'Inter',sans-serif;text-align:left;backdrop-filter:blur(8px);position:relative;}
+.action-tile:hover{border-color:#185FA5;transform:translateY(-3px);box-shadow:0 6px 20px rgba(24,95,165,.1);}
+.tile-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
+.tile-label{font-size:13px;font-weight:600;color:#1a202c;}
+.tile-sub{font-size:11px;color:#718096;line-height:1.4;}
+.tile-arrow{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#B5D4F4;font-size:16px;}
+.empty-actions{display:flex;flex-direction:column;align-items:center;gap:10px;padding:60px;color:#a0aec0;}
+.empty-actions i{font-size:48px;color:#B5D4F4;}
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .9s linear infinite; display: inline-block; }
+
+/* Role-relevant stats strip */
+.dh-stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+  animation: fadeUp .35s ease;
+}
+.dh-stat {
+  background: #fff;
+  border: 1px solid #E6F1FB;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  transition: transform .15s, border-color .15s, box-shadow .15s;
+}
+.dh-stat:hover { transform: translateY(-2px); border-color: #B5D4F4; box-shadow: 0 10px 22px rgba(12,68,124,.06); }
+.dh-stat-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.dh-stat-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dh-stat-val { font-size: 22px; font-weight: 700; color: #0C447C; line-height: 1; }
+.dh-stat-lbl { font-size: 12px; color: #4a5568; font-weight: 500; }
+.dh-stat-sub { font-size: 11px; color: #94a3b8; }
+.dh-stat-skel .dh-stat-icon { background: #E6F1FB; color: #185FA5; }
+
+/* Tip card */
+.dh-tip {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(90deg, #FFFBF5, #FAEEDA);
+  border: 1px solid #F1D7AF;
+  border-left: 4px solid #854F0B;
+  border-radius: 10px;
+  margin-bottom: 18px;
+  color: #4a3818;
+  font-size: 13px;
+  animation: fadeUp .4s ease;
+}
+.dh-tip i { color: #854F0B; font-size: 18px; flex-shrink: 0; }
+.dh-tip strong { color: #633806; margin-right: 4px; }
+
+@media(max-width:768px){
+  .dh-body{padding:16px;}
+  .dh-header{padding:16px 16px;}
+  .actions-grid{grid-template-columns:1fr 1fr;}
+  .dh-stats-row { grid-template-columns: 1fr 1fr; }
+  .dh-stat-val { font-size: 18px; }
+}

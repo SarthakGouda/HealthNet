@@ -1,0 +1,295 @@
+<div class="page">
+
+  <!-- ── Page Header (gradient) ─────────────────────────────── -->
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="brand-row">
+          <div class="brand-logo">
+            <i class="ti ti-virus"></i>
+          </div>
+          <div>
+            <h1>Outbreak Monitoring</h1>
+            <p class="subtitle">Track and manage disease outbreaks across all regions</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="page-badge">
+          <span class="live-dot"></span>
+          Live Registry
+        </div>
+        <button *ngIf="canDeclare" class="header-btn header-btn-primary" (click)="onDeclareNew()">
+          <i class="ti ti-plus"></i>
+          Declare New Outbreak
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Page Body ──────────────────────────────────────────── -->
+  <div class="page-body">
+
+    <!-- ── KPI Stat Cards ────────────────────────────────────── -->
+    <div class="kpi-row">
+      <div class="card kpi-card">
+        <div class="kpi-icon icon-outbreak"><i class="ti ti-alert-triangle"></i></div>
+        <div class="kpi-text">
+          <div class="kpi-val">{{ totalOutbreaks }}</div>
+          <div class="kpi-lbl">Total Outbreaks</div>
+        </div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-icon icon-active"><i class="ti ti-activity-heartbeat"></i></div>
+        <div class="kpi-text">
+          <div class="kpi-val">{{ activeOutbreaks }}</div>
+          <div class="kpi-lbl">Active Outbreaks</div>
+        </div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-icon icon-resolved"><i class="ti ti-circle-check"></i></div>
+        <div class="kpi-text">
+          <div class="kpi-val">{{ resolvedOutbreaks }}</div>
+          <div class="kpi-lbl">Resolved Outbreaks</div>
+        </div>
+      </div>
+      <div class="card kpi-card">
+        <div class="kpi-icon icon-results"><i class="ti ti-chart-bar"></i></div>
+        <div class="kpi-text">
+          <div class="kpi-val">{{ filteredOutbreaks.length }}</div>
+          <div class="kpi-lbl">Showing Results</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Filter Card ───────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="header-row">
+          <div class="card-icon icon-filter"><i class="ti ti-filter"></i></div>
+          <div>
+            <h2 class="card-title">Filter Outbreaks</h2>
+            <p class="card-subtitle">Refine results by disease, region, severity, status, or date</p>
+          </div>
+        </div>
+        <button class="btn-ghost" (click)="onResetFilters()">
+          <i class="ti ti-refresh"></i>
+          Reset All
+        </button>
+      </div>
+
+      <div class="filter-grid">
+
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-virus icon-inline"></i>
+            Disease
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="diseaseFilter"
+            (ngModelChange)="onFilterChange()"
+            placeholder="e.g. Influenza"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-map-pin icon-inline"></i>
+            Region / Location
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="locationFilter"
+            (ngModelChange)="onFilterChange()"
+            placeholder="e.g. North Region"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-alert-triangle icon-inline"></i>
+            Severity
+          </label>
+          <div class="select-wrapper">
+            <select class="form-control"
+                    [(ngModel)]="severityFilter" (ngModelChange)="onFilterChange()">
+              <option value="">All Severities</option>
+              <option *ngFor="let s of severityOptions.slice(1)" [value]="s">{{ s }}</option>
+            </select>
+            <i class="ti ti-chevron-down select-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-circle-check icon-inline"></i>
+            Status
+          </label>
+          <div class="select-wrapper">
+            <select class="form-control"
+                    [(ngModel)]="filters.status" (ngModelChange)="onApiFilterChange()">
+              <option value="">All Status</option>
+              <option *ngFor="let s of statusOptions.slice(1)" [value]="s">{{ s }}</option>
+            </select>
+            <i class="ti ti-chevron-down select-icon"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-calendar icon-inline"></i>
+            Start Date
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filters.startDate"
+            (ngModelChange)="onApiFilterChange()"
+            [max]="today"
+          />
+        </div>
+
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-calendar icon-inline"></i>
+            End Date
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            [(ngModel)]="filters.endDate"
+            (ngModelChange)="onApiFilterChange()"
+            [max]="today"
+          />
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Error Banner ──────────────────────────────────────── -->
+    <div class="alert alert-error" *ngIf="apiError">
+      <i class="ti ti-alert-circle"></i>
+      <span>{{ apiError }}</span>
+    </div>
+
+    <!-- ── Delete success toast ──────────────────────────────── -->
+    <div class="alert alert-success" *ngIf="deleteSuccess">
+      <i class="ti ti-circle-check"></i>
+      <span>{{ deleteSuccess }}</span>
+    </div>
+
+    <!-- ── Table Card ────────────────────────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="header-row">
+          <div class="card-icon icon-table"><i class="ti ti-clipboard-list"></i></div>
+          <div>
+            <h2 class="card-title">Active &amp; Contained Outbreaks</h2>
+            <p class="card-subtitle">{{ filteredOutbreaks.length }} outbreak(s) found</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="state-row" *ngIf="isLoading">
+        <span class="spinner spinner-dark"></span>
+        <p>Loading outbreaks...</p>
+      </div>
+
+      <!-- Empty -->
+      <div class="state-row" *ngIf="!isLoading && filteredOutbreaks.length === 0 && !apiError">
+        <i class="ti ti-search state-icon"></i>
+        <p>No outbreaks found for the selected filters.</p>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" *ngIf="!isLoading && filteredOutbreaks.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Outbreak ID</th>
+              <th>Disease</th>
+              <th>Location</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th *ngIf="canUpdate || canDelete" class="action-col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of filteredOutbreaks">
+              <td>
+                <button class="id-link" (click)="goView(o.outbreakId)" title="View details">
+                  #{{ o.outbreakId }}
+                </button>
+              </td>
+              <td class="cell-strong">{{ o.disease }}</td>
+              <td>
+                <span class="location-cell">
+                  <i class="ti ti-map-pin"></i>
+                  {{ o.location }}
+                </span>
+              </td>
+              <td>
+                <span class="date-cell">
+                  <i class="ti ti-calendar"></i>
+                  {{ formatDate(o.startDate) }}
+                </span>
+              </td>
+              <td>
+                <span class="date-cell">
+                  <i class="ti ti-calendar"></i>
+                  {{ formatDate(o.endDate) }}
+                </span>
+              </td>
+              <td><span class="badge" [ngClass]="getSeverityClass(o.severity)">{{ o.severity }}</span></td>
+              <td><span class="badge" [ngClass]="getStatusClass(o.status)">{{ getStatusLabel(o.status) }}</span></td>
+              <td *ngIf="canUpdate || canDelete" class="action-col">
+                <button *ngIf="canUpdate && o.status" class="row-btn-edit" (click)="goEdit(o.outbreakId)" title="Edit outbreak">
+                  <i class="ti ti-edit"></i> Edit
+                </button>
+                <button *ngIf="canDelete" class="row-btn-delete" (click)="askDelete(o)" title="Delete outbreak">
+                  <i class="ti ti-trash"></i> Delete
+                </button>
+                <span *ngIf="canUpdate && !o.status && !canDelete" class="row-disabled" title="Closed outbreaks cannot be edited">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Delete Confirmation Modal ────────────────────────────── -->
+  <div *ngIf="confirmDelete" class="modal-backdrop" (click)="cancelDelete()">
+    <div class="modal-panel" (click)="$event.stopPropagation()">
+      <div class="modal-icon"><i class="ti ti-alert-triangle"></i></div>
+      <h3 class="modal-title">Delete Outbreak?</h3>
+      <p class="modal-body">
+        You're about to delete <strong>{{ confirmDelete.disease }}</strong>
+        in <strong>{{ confirmDelete.location }}</strong>
+        (ID #{{ confirmDelete.outbreakId }}).
+        This action will close the outbreak and remove it from active records.
+      </p>
+
+      <div *ngIf="deleteError" class="modal-error">
+        <i class="ti ti-alert-circle"></i> {{ deleteError }}
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" (click)="cancelDelete()" [disabled]="isDeleting">
+          Cancel
+        </button>
+        <button class="btn btn-delete" (click)="doDelete()" [disabled]="isDeleting">
+          <span *ngIf="!isDeleting"><i class="ti ti-trash"></i> Delete</span>
+          <span *ngIf="isDeleting"><span class="spinner-sm"></span> Deleting…</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

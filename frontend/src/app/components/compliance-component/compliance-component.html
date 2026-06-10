@@ -1,0 +1,134 @@
+<div class="cmp-page">
+
+  <!-- Hero -->
+  <section class="cmp-hero">
+    <div class="cmp-hero-inner">
+      <div class="cmp-hero-text">
+        <div class="cmp-eyebrow">
+          <i class="ti ti-shield-check"></i>
+          <span>HealthNet · Compliance Posture</span>
+        </div>
+        <h1>Transparent oversight,<br/>built into every record.</h1>
+        <p>
+          We don't bolt compliance on at the end — every case, lab test and outbreak in
+          HealthNet is tracked against four clear outcomes, attributed to a named officer,
+          and reviewable on demand.
+        </p>
+        <div class="cmp-cta">
+          <a class="cmp-btn primary" routerLink="/login">
+            <i class="ti ti-login-2"></i> Sign in
+          </a>
+          <a class="cmp-btn ghost" routerLink="/about">
+            <i class="ti ti-info-circle"></i> About HealthNet
+          </a>
+        </div>
+      </div>
+
+      <div class="cmp-hero-stats">
+        <div class="stat">
+          <div class="stat-num">4</div>
+          <div class="stat-lbl">Compliance outcomes</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">3</div>
+          <div class="stat-lbl">Entity types audited</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">7</div>
+          <div class="stat-lbl">Roles, scoped access</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">100%</div>
+          <div class="stat-lbl">Mutations attributed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Body -->
+  <section class="cmp-body">
+
+    <!-- Flow strip -->
+    <div class="cmp-section">
+      <div class="cmp-section-head">
+        <h2>How a compliance check moves through HealthNet</h2>
+        <p>Three lightweight steps. Every transition is logged with a timestamp and an officer ID.</p>
+      </div>
+      <div class="flow-strip">
+        <div class="flow-step" *ngFor="let s of flow">
+          <div class="flow-num">{{ s.num }}</div>
+          <div class="flow-icon"><i class="ti" [ngClass]="s.icon"></i></div>
+          <div class="flow-title">{{ s.title }}</div>
+          <div class="flow-text">{{ s.text }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result chips -->
+    <div class="cmp-section">
+      <div class="cmp-section-head">
+        <h2>The four outcomes</h2>
+        <p>Every record lands in exactly one of these buckets — never blank, never ambiguous.</p>
+      </div>
+      <div class="chip-row">
+        <div class="result-chip" *ngFor="let r of results" [ngClass]="r.cssClass">
+          <span class="dot"></span>{{ r.value }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Role matrix -->
+    <div class="cmp-section">
+      <div class="cmp-section-head">
+        <h2>Who can do what</h2>
+        <p>Server-enforced. The frontend just mirrors permissions — it can't grant them.</p>
+      </div>
+      <div class="matrix-wrap">
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th><i class="ti ti-plus"></i><br/>Create record</th>
+              <th><i class="ti ti-pencil"></i><br/>Review / update</th>
+              <th><i class="ti ti-clipboard-check"></i><br/>Run audits</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of roleMatrix">
+              <td class="role-name">{{ r.role }}</td>
+              <td>
+                <span class="dot-yes" *ngIf="r.create"><i class="ti ti-check"></i></span>
+                <span class="dot-no"  *ngIf="!r.create"><i class="ti ti-minus"></i></span>
+              </td>
+              <td>
+                <span class="dot-yes" *ngIf="r.review"><i class="ti ti-check"></i></span>
+                <span class="dot-no"  *ngIf="!r.review"><i class="ti ti-minus"></i></span>
+              </td>
+              <td>
+                <span class="dot-yes" *ngIf="r.audit"><i class="ti ti-check"></i></span>
+                <span class="dot-no"  *ngIf="!r.audit"><i class="ti ti-minus"></i></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Closing CTA -->
+    <div class="cmp-final">
+      <div class="cmp-final-text">
+        <h3>Ready to get started?</h3>
+        <p>Citizens submit symptom reports; clinical staff and officers manage the rest.</p>
+      </div>
+      <div class="cmp-final-actions">
+        <a class="cmp-btn primary" routerLink="/register">
+          <i class="ti ti-user-plus"></i> Create account
+        </a>
+        <a class="cmp-btn outline" routerLink="/login">
+          <i class="ti ti-login-2"></i> Sign in
+        </a>
+      </div>
+    </div>
+
+  </section>
+</div>

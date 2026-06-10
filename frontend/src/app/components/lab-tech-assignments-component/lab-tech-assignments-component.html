@@ -1,0 +1,67 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-clipboard-data"></i></div>
+        <div>
+          <div class="page-title">My Assignments</div>
+          <div class="page-sub"><span class="dot"></span>Lab Technician · HealthNet</div>
+        </div>
+      </div>
+      <a class="btn-create" routerLink="/lab-tests/upload-report"><i class="ti ti-upload"></i> Upload Report</a>
+    </div>
+  </div>
+
+  <div class="page-body">
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <div class="card search-card">
+      <div class="search-row">
+        <select class="form-select" [(ngModel)]="typeFilter" (change)="load()">
+          <option value="">All types</option>
+          <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
+        </select>
+        <select class="form-select" [(ngModel)]="statusFilter" (change)="load()">
+          <option value="">All status</option>
+          <option value="Pending">Pending</option>
+          <option value="Completed">Completed</option>
+        </select>
+        <input type="date" class="form-control" [(ngModel)]="dateFilter" (change)="load()" />
+        <button class="btn-ghost" (click)="clearFilters()"><i class="ti ti-x"></i> Clear</button>
+        <span class="count-badge">{{ filtered.length }} assigned</span>
+      </div>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading assignments...</p></div>
+
+    <div class="card" *ngIf="!isLoading">
+      <div class="empty" *ngIf="filtered.length === 0">
+        <i class="ti ti-clipboard"></i>
+        <div class="empty-title">No assignments</div>
+        <div class="empty-sub">Tests assigned to you will appear here</div>
+      </div>
+      <div class="table-wrap" *ngIf="filtered.length > 0">
+        <table>
+          <thead>
+            <tr><th>Test #</th><th>Patient</th><th>Type</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of filtered">
+              <td class="id-cell">#{{ t.testId }}</td>
+              <td>Patient #{{ t.patientId }}</td>
+              <td><span class="type-chip">{{ t.type }}</span></td>
+              <td>{{ formatDate(t.date) }}</td>
+              <td><span class="badge" [ngClass]="statusBadge(t.status)">{{ statusLabel(t.status) }}</span></td>
+              <td>
+                <button class="row-btn btn-warning" (click)="goUpload(t.testId)" *ngIf="!t.status">
+                  <i class="ti ti-upload"></i> Upload Report
+                </button>
+                <a class="row-btn btn-info" [routerLink]="['/lab-tests', t.testId]"><i class="ti ti-eye"></i> View</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

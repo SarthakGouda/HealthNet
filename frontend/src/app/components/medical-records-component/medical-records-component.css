@@ -1,0 +1,29 @@
+/* Medical records — uses shared classes from src/styles.css.
+ * Only component-specific overrides live here. */
+
+/* Solid blue Add Record button — visible on the white search card */
+.btn-create-small {
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #0C447C, #185FA5);
+  border: 1px solid #185FA5;
+  color: #fff;
+  border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: 'Inter', sans-serif;
+  transition: transform .15s, box-shadow .15s, background .15s;
+  white-space: nowrap;
+}
+.btn-create-small:hover {
+  background: linear-gradient(135deg, #0a3a6a, #0C447C);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(12,68,124,.2);
+}
+.btn-create-small i { font-size: 14px; }
+
+.diag-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width: 768px) {
+  .table-wrap table th:nth-child(3),
+  .table-wrap table td:nth-child(3) { display: none; }
+}

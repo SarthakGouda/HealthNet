@@ -1,0 +1,48 @@
+<div class="idp" [class.open]="isOpen" [class.disabled]="disabled">
+  <button type="button" class="idp-trigger" (click)="toggle()" [disabled]="disabled">
+    <i class="ti ti-search idp-ico"></i>
+    <span class="idp-value" *ngIf="selected">
+      <span class="idp-label">{{ selected.label }}</span>
+      <small class="idp-sub" *ngIf="selected.sub">{{ selected.sub }}</small>
+    </span>
+    <span class="idp-placeholder" *ngIf="!selected">{{ placeholder }}</span>
+    <button type="button" class="idp-clear" *ngIf="selected && !disabled" (click)="clear($event)" aria-label="Clear">
+      <i class="ti ti-x"></i>
+    </button>
+    <i class="ti ti-chevron-down idp-caret"></i>
+  </button>
+
+  <div class="idp-pop" *ngIf="isOpen">
+    <div class="idp-search" *ngIf="searchable || allowManualEntry">
+      <i class="ti ti-search"></i>
+      <input type="text"
+             [placeholder]="allowManualEntry ? 'Filter or type an ID…' : 'Type to filter…'"
+             [(ngModel)]="search"
+             (keydown.enter)="pickManual()"
+             autofocus />
+    </div>
+
+    <!-- Manual-entry affordance -->
+    <button type="button" class="idp-manual" *ngIf="allowManualEntry && manualCandidate != null" (click)="pickManual()">
+      <i class="ti ti-plus"></i>
+      <span>Use ID <strong>#{{ manualCandidate }}</strong></span>
+    </button>
+
+    <div class="idp-list" *ngIf="(options?.length ?? 0) > 0; else loadingOrEmpty">
+      <button type="button" class="idp-opt" *ngFor="let o of filtered" (click)="pick(o)"
+              [class.active]="o.value === value">
+        <span class="idp-opt-main">{{ o.label }}</span>
+        <small class="idp-opt-sub" *ngIf="o.sub">{{ o.sub }}</small>
+      </button>
+      <div class="idp-empty" *ngIf="filtered.length === 0 && manualCandidate == null">{{ emptyText }}</div>
+    </div>
+
+    <ng-template #loadingOrEmpty>
+      <div class="idp-empty" *ngIf="options === null">{{ loadingText }}</div>
+      <div class="idp-empty" *ngIf="options && options.length === 0 && manualCandidate == null">
+        <ng-container *ngIf="!allowManualEntry">{{ emptyText }}</ng-container>
+        <ng-container *ngIf="allowManualEntry">Type a numeric ID above to use it directly.</ng-container>
+      </div>
+    </ng-template>
+  </div>
+</div>

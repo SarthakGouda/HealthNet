@@ -1,0 +1,179 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="ti ti-flask"></i>
+        </div>
+        <div>
+          <div class="page-title">Lab Test Details</div>
+          <div class="page-sub">
+            <span class="dot"></span> Test #{{ testId }} · HealthNet
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-back" (click)="goBack()">
+          <i class="ti ti-arrow-left"></i> Back to Tests
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Test loading -->
+    <div class="loading-wrap" *ngIf="isLoadingTest">
+      <div class="spinner"></div>
+      <p class="muted-text">Loading test details...</p>
+    </div>
+
+    <!-- Test error -->
+    <div class="error-card" *ngIf="testError">
+      <i class="ti ti-alert-circle"></i> {{ testError }}
+    </div>
+
+    <!-- Lab Test Details Card -->
+    <div class="card" *ngIf="!isLoadingTest && labTest">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="ti ti-clipboard-list"></i> Lab Test Information
+        </div>
+          <button class="btn-edit"
+            *ngIf="canEdit && labTest && !labTest.status"
+            (click)="navigateToEdit()">
+            <i class="ti ti-edit"></i> Edit Test
+          </button>
+        <span class="badge" [ngClass]="getStatusClass(labTest.status)">
+          {{ getStatusLabel(labTest.status) }}
+        </span>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="ti ti-hash"></i> Test ID
+          </div>
+          <div class="detail-value test-id">#{{ labTest.testId }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="ti ti-user"></i> Patient ID
+          </div>
+          <div class="detail-value">P-{{ labTest.patientId }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="ti ti-flask"></i> Test Type
+          </div>
+          <div class="detail-value">
+            <span class="type-chip">{{ labTest.type }}</span>
+          </div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="ti ti-calendar"></i> Date
+          </div>
+          <div class="detail-value">{{ formatDate(labTest.date) }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="ti ti-stethoscope"></i> Technician ID
+          </div>
+          <div class="detail-value">Tech-{{ labTest.technicianId }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">
+            <i class="ti ti-activity"></i> Status
+          </div>
+          <div class="detail-value">
+            <span class="badge" [ngClass]="getStatusClass(labTest.status)">
+              {{ getStatusLabel(labTest.status) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reports Card -->
+    <div class="card" *ngIf="!isLoadingTest && labTest">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="ti ti-file-report"></i> Lab Reports
+        </div>
+        <!-- Download button — only if reports exist -->
+        <button
+          class="btn-download"
+          *ngIf="reports.length > 0"
+          (click)="downloadReport()"
+          [disabled]="isDownloading">
+          <i class="ti ti-download"></i>
+          {{ isDownloading ? 'Downloading...' : 'Download Report' }}
+        </button>
+      </div>
+
+      <!-- Download error -->
+      <div class="error-card" *ngIf="downloadError">
+        <i class="ti ti-alert-circle"></i> {{ downloadError }}
+      </div>
+
+      <!-- Reports loading -->
+      <div class="loading-wrap" *ngIf="isLoadingReports">
+        <div class="spinner"></div>
+        <p class="muted-text">Loading reports...</p>
+      </div>
+
+      <!-- No reports -->
+      <div class="empty" *ngIf="!isLoadingReports && reports.length === 0 && !reportError">
+        <i class="ti ti-file-off"></i>
+        <div class="empty-title">No reports uploaded yet</div>
+        <div class="empty-sub">Reports will appear here once uploaded by the technician</div>
+      </div>
+
+      <!-- Report error -->
+      <div class="error-card" *ngIf="reportError">
+        <i class="ti ti-alert-circle"></i> {{ reportError }}
+      </div>
+
+      <!-- Reports table -->
+      <div class="table-wrap" *ngIf="!isLoadingReports && reports.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Report ID</th>
+              <th>File Name</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let report of reports; let i = index"
+                [style.animation-delay]="i * 0.05 + 's'">
+              <td class="test-id">#{{ report.reportId }}</td>
+              <td>
+                <div class="file-cell">
+                  <i class="ti ti-file-text"></i>
+                  {{ report.fileURI }}
+                </div>
+              </td>
+              <td>
+                <div class="date-cell">
+                  <i class="ti ti-calendar"></i>
+                  {{ formatDate(report.date) }}
+                </div>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="getReportStatusClass(report.status)">
+                  {{ getReportStatusLabel(report.status) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

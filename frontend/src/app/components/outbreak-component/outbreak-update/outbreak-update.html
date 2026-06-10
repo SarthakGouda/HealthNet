@@ -1,0 +1,127 @@
+<div class="page">
+
+  <!-- ── Page Header ───────────────────────────────────────────── -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <div class="brand">
+        <div class="brand-logo"><i class="ti ti-edit"></i></div>
+        <div>
+          <h1 class="page-title">Update Outbreak</h1>
+          <p class="page-subtitle">Modify severity, end date or status of an existing outbreak</p>
+        </div>
+      </div>
+      <button class="header-btn" (click)="onCancel()">
+        <i class="ti ti-arrow-left"></i> Back
+      </button>
+    </div>
+  </header>
+
+  <div class="page-body">
+
+    <!-- ── Loading ──────────────────────────────────────────────── -->
+    <div *ngIf="isLoading" class="card loading-card">
+      <span class="spinner"></span>
+      <span>Loading outbreak…</span>
+    </div>
+
+    <!-- ── Error ────────────────────────────────────────────────── -->
+    <div *ngIf="apiError && !isLoading" class="card error-card">
+      <i class="ti ti-alert-circle"></i>
+      <span>{{ apiError }}</span>
+    </div>
+
+    <!-- ── Success ──────────────────────────────────────────────── -->
+    <div *ngIf="successMessage" class="card success-card">
+      <i class="ti ti-circle-check"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- ── Form ─────────────────────────────────────────────────── -->
+    <section *ngIf="outbreak && !isLoading" class="card">
+      <div class="card-head">
+        <i class="ti ti-virus"></i>
+        <span>Outbreak #{{ outbreak.outbreakId }}</span>
+      </div>
+
+      <!-- Read-only summary -->
+      <div class="readonly-grid">
+        <div class="ro-field">
+          <span class="ro-label">Disease</span>
+          <span class="ro-value">{{ outbreak.disease }}</span>
+        </div>
+        <div class="ro-field">
+          <span class="ro-label">Location</span>
+          <span class="ro-value"><i class="ti ti-map-pin"></i> {{ outbreak.location }}</span>
+        </div>
+        <div class="ro-field">
+          <span class="ro-label">Start Date</span>
+          <span class="ro-value"><i class="ti ti-calendar"></i> {{ formatDate(outbreak.startDate) }}</span>
+        </div>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-grid" novalidate>
+
+        <!-- Severity -->
+        <div class="field">
+          <label for="severity">Severity <span class="req">*</span></label>
+          <select
+            id="severity"
+            class="form-control"
+            formControlName="severity"
+            [class.is-invalid]="severity.invalid && severity.touched">
+            <option value="" disabled>Select severity</option>
+            <option *ngFor="let opt of severityOptions" [value]="opt">{{ opt }}</option>
+          </select>
+          <div class="error-msg" *ngIf="severity.invalid && severity.touched">
+            <i class="ti ti-alert-circle"></i> Severity is required.
+          </div>
+        </div>
+
+        <!-- End Date -->
+        <div class="field">
+          <label for="endDate">End Date <span class="req">*</span></label>
+          <input
+            id="endDate"
+            type="date"
+            class="form-control"
+            formControlName="endDate"
+            [class.is-invalid]="endDate.invalid && endDate.touched" />
+          <div class="error-msg" *ngIf="endDate.invalid && endDate.touched">
+            <i class="ti ti-alert-circle"></i>
+            <ng-container *ngIf="endDate.errors?.['required']">End date is required.</ng-container>
+            <ng-container *ngIf="endDate.errors?.['futureDate']">End date cannot be in the future.</ng-container>
+            <ng-container *ngIf="endDate.errors?.['endBeforeStart']">End date cannot be earlier than the start date.</ng-container>
+          </div>
+          <small class="hint">
+            <i class="ti ti-info-circle"></i>
+            If the end date is in the past, the outbreak will be auto-closed.
+          </small>
+        </div>
+
+        <!-- Status toggle -->
+        <div class="field field-toggle">
+          <label class="toggle">
+            <input type="checkbox" formControlName="status" />
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            <span class="toggle-text">
+              <span class="toggle-title">Active</span>
+              <span class="toggle-sub">Uncheck to close this outbreak</span>
+            </span>
+          </label>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" (click)="onCancel()" [disabled]="isSaving">
+            Cancel
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving || form.invalid">
+            <span *ngIf="!isSaving"><i class="ti ti-device-floppy"></i> Save Changes</span>
+            <span *ngIf="isSaving"><span class="spinner-sm"></span> Saving…</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+  </div>
+</div>

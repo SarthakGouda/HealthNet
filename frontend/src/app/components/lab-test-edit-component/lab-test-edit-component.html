@@ -1,0 +1,169 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="ti ti-flask"></i>
+        </div>
+        <div>
+          <div class="page-title">Update Lab Test</div>
+          <div class="page-sub">
+            <span class="dot"></span> Edit Test #{{ testId }} · HealthNet
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn-back" (click)="goBack()">
+          <i class="ti ti-arrow-left"></i> Back to Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Loading -->
+    <div class="loading-wrap" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p class="muted-text">Loading test details...</p>
+    </div>
+
+    <!-- Load error -->
+    <div class="error-card" *ngIf="loadError && !isLoading">
+      <i class="ti ti-alert-circle"></i> {{ loadError }}
+      <button class="btn-back-inline" (click)="goBack()">Go Back</button>
+    </div>
+
+    <!-- Current test info -->
+    <div class="info-card" *ngIf="!isLoading && labTest && !loadError">
+      <div class="info-title">
+        <i class="ti ti-info-circle"></i> Current Test Information
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Test ID</span>
+          <span class="info-value test-id">#{{ labTest.testId }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Patient ID</span>
+          <span class="info-value">P-{{ labTest.patientId }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Current Type</span>
+          <span class="type-chip">{{ labTest.type }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Technician</span>
+          <span class="info-value">Tech-{{ labTest.technicianId }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Status</span>
+          <span class="badge badge-pending">Pending</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success -->
+    <div class="success-card" *ngIf="successMsg">
+      <i class="ti ti-circle-check"></i> {{ successMsg }}
+      <button class="btn-view" (click)="goBack()">
+        View Details <i class="ti ti-arrow-right"></i>
+      </button>
+    </div>
+
+    <!-- Error -->
+    <div class="error-card" *ngIf="errorMsg">
+      <i class="ti ti-alert-circle"></i> {{ errorMsg }}
+    </div>
+
+    <!-- Edit Form -->
+    <div class="card" *ngIf="!isLoading && labTest && !loadError">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="ti ti-edit"></i> Edit Details
+        </div>
+        <div class="role-badge" *ngIf="isDoctor">
+          <i class="ti ti-stethoscope"></i> Doctor — Can update Type & Technician
+        </div>
+        <div class="role-badge tech" *ngIf="!isDoctor">
+          <i class="ti ti-flask"></i> Lab Technician — Can update Type only
+        </div>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- Test Type -->
+        <div class="form-group">
+          <label class="field-label">
+            <i class="ti ti-flask"></i> Test Type
+          </label>
+          <select
+            class="form-select"
+            [class.is-invalid]="typeError"
+            [(ngModel)]="selectedType">
+            <option value="">Select test type</option>
+            <option *ngFor="let type of typeOptions" [value]="type">{{ type }}</option>
+          </select>
+          <div class="invalid-feedback" *ngIf="typeError">
+            <i class="ti ti-alert-circle"></i> {{ typeError }}
+          </div>
+        </div>
+
+        <!-- Technician picker — Doctor only -->
+        <div class="form-group" *ngIf="isDoctor">
+          <label class="field-label">
+            <i class="ti ti-stethoscope"></i> Lab Technician
+          </label>
+          <app-id-picker
+            [options]="technicians$ | async"
+            placeholder="Reassign technician…"
+            emptyText="No technicians cached — type the User ID below."
+            [allowManualEntry]="true"
+            [(ngModel)]="technicianId">
+          </app-id-picker>
+          <div class="invalid-feedback" *ngIf="technicianIdError">
+            <i class="ti ti-alert-circle"></i> {{ technicianIdError }}
+          </div>
+        </div>
+
+        <!-- Technician locked for Lab Tech -->
+        <div class="form-group" *ngIf="!isDoctor">
+          <label class="field-label">
+            <i class="ti ti-stethoscope"></i> Technician ID
+          </label>
+          <input
+            type="number"
+            class="form-control locked"
+            [value]="labTest.technicianId"
+            disabled
+          />
+          <div class="lock-note">
+            <i class="ti ti-lock"></i> Only Doctors can reassign technicians
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Buttons -->
+      <div class="btn-row">
+        <button
+          class="btn-primary"
+          (click)="onSubmit()"
+          [disabled]="isSubmitting">
+          <i class="ti ti-check"></i>
+          {{ isSubmitting ? 'Updating...' : 'Save Changes' }}
+        </button>
+        <button class="btn-ghost" (click)="loadLabTest()" [disabled]="isSubmitting">
+          <i class="ti ti-refresh"></i> Reset
+        </button>
+        <button class="btn-outline" (click)="goBack()" [disabled]="isSubmitting">
+          <i class="ti ti-x"></i> Cancel
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>

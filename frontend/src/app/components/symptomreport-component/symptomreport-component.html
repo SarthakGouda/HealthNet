@@ -1,0 +1,278 @@
+<div class="sr-page">
+
+  <!-- PAGE TITLE BAR -->
+  <div class="sr-header">
+    <div class="header-inner">
+      <div class="header-main">
+        <div class="header-title-wrap">
+          <div class="page-badge">
+            <span class="live-dot"></span>Citizen Health Portal
+          </div>
+          <h1 class="header-h1">
+            <i class="ti ti-report-medical"></i>Symptom Report
+          </h1>
+          <p class="header-sub">
+            Report your symptoms · Public health monitoring · HIPAA protected
+          </p>
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:8px">
+          <button class="tab-btn" (click)="navigateToHome('/citizen-home')" style="border-radius:8px">
+            <i class="ti ti-home"></i>Dashboard
+          </button>
+          <div class="tab-row">
+            <button class="tab-btn" [class.active]="activeTab === 'create'"
+                    (click)="activeTab = 'create'; isSubmitted = false">
+              <i class="ti ti-plus"></i>New Report
+            </button>
+            <button class="tab-btn" [class.active]="activeTab === 'history'"
+                    (click)="navigateToHistory()">
+              <i class="ti ti-clipboard-list"></i>My Reports
+              <span *ngIf="myReports.length" class="cnt">{{ myReports.length }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sr-body">
+
+    <!-- ERROR -->
+    <div *ngIf="errorMessage" class="err-box">
+      <i class="ti ti-alert-circle"></i>{{ errorMessage }}
+    </div>
+
+    <!-- SUCCESS -->
+    <div *ngIf="isSubmitted && activeTab === 'create'" class="success-wrap">
+      <div class="success-card">
+        <div class="success-icon"><i class="ti ti-circle-check"></i></div>
+        <h3>Report Submitted!</h3>
+        <div class="success-id">
+          <i class="ti ti-hash"></i>Report received successfully
+        </div>
+        <p>Your symptom report has been received and assigned to a public health officer. You will be notified once it is reviewed.</p>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="outline-btn" (click)="resetForm()">
+            <i class="ti ti-plus"></i>Submit Another
+          </button>
+          <button class="submit-btn" (click)="navigateToHistory()">
+            <i class="ti ti-clipboard-list"></i>View My Reports
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE TAB -->
+    <div *ngIf="!isSubmitted && activeTab === 'create'">
+      <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Date -->
+        <div class="sec">
+          <div class="sec-head">
+            <div class="sec-icon" style="background:#E6F1FB"><i class="ti ti-calendar" style="color:#185FA5"></i></div>
+            <div>
+              <div class="sec-title">Date of Symptoms</div>
+              <div class="sec-sub">When did you first notice these symptoms?</div>
+            </div>
+          </div>
+          <div class="date-wrap">
+            <i class="ti ti-calendar date-icon"></i>
+            <input type="date" formControlName="date" class="date-input"
+                   [max]="todayDate()"
+                   [class.is-invalid]="reportForm.get('date')?.invalid && reportForm.get('date')?.touched" />
+          </div>
+          <div class="field-error" *ngIf="reportForm.get('date')?.invalid && reportForm.get('date')?.touched">
+            Date is required.
+          </div>
+        </div>
+
+        <!-- Symptoms -->
+        <div class="sec">
+          <div class="sec-head">
+            <div class="sec-icon" style="background:#E1F5EE"><i class="ti ti-activity-heartbeat" style="color:#0F6E56"></i></div>
+            <div>
+              <div class="sec-title">Select Symptoms</div>
+              <div class="sec-sub">Tap all symptoms you are currently experiencing</div>
+            </div>
+          </div>
+          <div class="sym-grid">
+            <button *ngFor="let key of commonSymptoms" type="button"
+                    class="s-chip" [class.on]="isSelected(key)"
+                    (click)="toggleSymptom(key)">
+              <i class="ti ti-check ck"></i>
+              <span>{{ symptomLabels[key] }}</span>
+            </button>
+          </div>
+          <div *ngIf="selectedSymptoms.size === 0 && reportForm.touched" class="field-error">
+            Please select at least one symptom.
+          </div>
+        </div>
+
+        <!-- Severity -->
+        <div *ngIf="selectedSymptoms.size > 0" class="sec">
+          <div class="sec-head">
+            <div class="sec-icon" style="background:#FAEEDA"><i class="ti ti-alert-triangle" style="color:#854F0B"></i></div>
+            <div>
+              <div class="sec-title">Rate Severity</div>
+              <div class="sec-sub">How severe is each selected symptom?</div>
+            </div>
+          </div>
+          <div class="sev-list">
+            <div *ngFor="let ctrl of symptomsArray.controls" class="sev-row">
+              <span class="sev-name">
+                <span class="sev-dot"></span>
+                {{ symptomLabels[ctrl.get('name')?.value] }}
+              </span>
+              <div class="sev-btns">
+                <button type="button" class="sev-btn mild"
+                        [class.active]="ctrl.get('severity')?.value === 'MILD'"
+                        (click)="setSeverity(ctrl.get('name')?.value, 'MILD')">
+                  Mild
+                </button>
+                <button type="button" class="sev-btn moderate"
+                        [class.active]="ctrl.get('severity')?.value === 'MODERATE'"
+                        (click)="setSeverity(ctrl.get('name')?.value, 'MODERATE')">
+                  Moderate
+                </button>
+                <button type="button" class="sev-btn severe"
+                        [class.active]="ctrl.get('severity')?.value === 'SEVERE'"
+                        (click)="setSeverity(ctrl.get('name')?.value, 'SEVERE')">
+                  Severe
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vitals -->
+        <div class="sec">
+          <div class="sec-head">
+            <div class="sec-icon" style="background:#FBEAF0"><i class="ti ti-heart-rate-monitor" style="color:#993556"></i></div>
+            <div>
+              <div class="sec-title">Vitals <span class="optional">(optional but recommended)</span></div>
+              <div class="sec-sub">Enter your current readings for more accurate assessment</div>
+            </div>
+          </div>
+          <div class="vitals-grid">
+            <div class="vital-card required"
+                 [class.filled]="reportForm.get('temperature')?.value"
+                 [class.invalid]="reportForm.get('temperature')?.touched && reportForm.get('temperature')?.invalid">
+              <div class="vital-label">
+                <i class="ti ti-thermometer" style="color:#E53E3E"></i>Temperature
+                <span class="req">*</span>
+              </div>
+              <input class="vital-input" formControlName="temperature" type="number" placeholder="98.6" step="0.1" min="90" max="115" required />
+              <div class="vital-unit">°F</div>
+              <div class="vital-normal">Normal: 97–99°F</div>
+              <small class="vital-err" *ngIf="reportForm.get('temperature')?.touched && reportForm.get('temperature')?.invalid">
+                Required (90–115°F)
+              </small>
+            </div>
+            <div class="vital-card required"
+                 [class.filled]="reportForm.get('oxygenSaturation')?.value"
+                 [class.invalid]="reportForm.get('oxygenSaturation')?.touched && reportForm.get('oxygenSaturation')?.invalid">
+              <div class="vital-label">
+                <i class="ti ti-lungs" style="color:#0F6E56"></i>Oxygen Saturation
+                <span class="req">*</span>
+              </div>
+              <input class="vital-input" formControlName="oxygenSaturation" type="number" placeholder="98" min="50" max="100" required />
+              <div class="vital-unit">SpO₂ %</div>
+              <div class="vital-normal">Normal: 95–100%</div>
+              <small class="vital-err" *ngIf="reportForm.get('oxygenSaturation')?.touched && reportForm.get('oxygenSaturation')?.invalid">
+                Required (50–100%)
+              </small>
+            </div>
+            <div class="vital-card" [class.filled]="reportForm.get('heartRate')?.value">
+              <div class="vital-label"><i class="ti ti-heart" style="color:#993556"></i>Heart Rate</div>
+              <input class="vital-input" formControlName="heartRate" type="number" placeholder="72" min="30" max="220" />
+              <div class="vital-unit">BPM</div>
+              <div class="vital-normal">Normal: 60–100 BPM</div>
+            </div>
+            <div class="vital-card" [class.filled]="reportForm.get('bpSystolic')?.value">
+              <div class="vital-label"><i class="ti ti-activity" style="color:#854F0B"></i>Blood Pressure</div>
+              <div class="bp-wrap">
+                <input class="vital-input" formControlName="bpSystolic" type="number" placeholder="120" min="60" max="250" style="width:55px;font-size:18px" />
+                <span class="bp-slash">/</span>
+                <input class="vital-input" formControlName="bpDiastolic" type="number" placeholder="80" min="40" max="150" style="width:55px;font-size:18px" />
+              </div>
+              <div class="vital-unit">mmHg (Sys / Dia)</div>
+              <div class="vital-normal">Normal: 120/80 mmHg</div>
+            </div>
+            <div class="vital-card" [class.filled]="reportForm.get('respiratoryRate')?.value">
+              <div class="vital-label"><i class="ti ti-wind" style="color:#185FA5"></i>Respiratory Rate</div>
+              <input class="vital-input" formControlName="respiratoryRate" type="number" placeholder="16" min="5" max="60" />
+              <div class="vital-unit">breaths/min</div>
+              <div class="vital-normal">Normal: 12–20/min</div>
+            </div>
+            <div class="vital-card" [class.filled]="reportForm.get('weight')?.value">
+              <div class="vital-label"><i class="ti ti-scale" style="color:#534AB7"></i>Weight</div>
+              <input class="vital-input" formControlName="weight" type="number" placeholder="70" min="1" max="300" />
+              <div class="vital-unit">kg</div>
+              <div class="vital-normal">For BMI calculation</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="sec">
+          <div class="sec-head">
+            <div class="sec-icon" style="background:#EEEDFE"><i class="ti ti-notes" style="color:#534AB7"></i></div>
+            <div>
+              <div class="sec-title">Additional Notes <span class="optional">(optional)</span></div>
+              <div class="sec-sub">Any other symptoms, recent travel, or context</div>
+            </div>
+          </div>
+          <textarea class="notes-ta" formControlName="otherSymptoms" rows="3"
+                    placeholder="e.g. symptoms started after travel, rash on arm, recently attended event...">
+          </textarea>
+          <div class="char-count">
+            {{ reportForm.get('otherSymptoms')?.value?.length ?? 0 }} / 500
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="submit-row">
+          <div class="submit-note">
+            <i class="ti ti-shield-check" style="color:#185FA5;font-size:16px"></i>
+            256-bit encrypted · HIPAA compliant · Confidential
+          </div>
+          <button type="submit" class="submit-btn" [disabled]="isLoading">
+            <span *ngIf="isLoading" class="spinner-border spinner-border-sm"></span>
+            <i *ngIf="!isLoading" class="ti ti-send"></i>
+            {{ isLoading ? 'Submitting...' : 'Submit Report' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div *ngIf="activeTab === 'history'">
+      <div *ngIf="myReports.length === 0" class="empty-state">
+        <i class="ti ti-clipboard-list empty-icon"></i>
+        <p>No reports submitted yet.</p>
+        <button class="outline-btn" (click)="activeTab = 'create'">
+          Create your first report
+        </button>
+      </div>
+      <div *ngFor="let r of myReports" class="rpt-card">
+        <div class="rpt-head">
+          <div>
+            <span class="rpt-date">
+              <i class="ti ti-calendar"></i> {{ r.date | date:'mediumDate' }}
+            </span>
+            <span class="rpt-id">#{{ r.reportId }}</span>
+          </div>
+          <span [class]="getStatusClass(r.status)">{{ r.status }}</span>
+        </div>
+        <div class="rpt-tags">
+          <span *ngFor="let s of parsedSymptoms(r.symptomsJson)" class="rpt-tag">{{ s }}</span>
+        </div>
+        <p *ngIf="parsedVitals(r.symptomsJson)" class="rpt-note">
+          <i class="ti ti-thermometer"></i> {{ parsedVitals(r.symptomsJson) }}
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,199 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-users"></i></div>
+        <div>
+          <div class="page-title">Patient Management</div>
+          <div class="page-sub"><span class="dot"></span>Patient Registry · HealthNet</div>
+        </div>
+      </div>
+      <button class="btn-create" *ngIf="canRegister" (click)="showForm = !showForm">
+        <i class="ti ti-plus"></i> {{ showForm ? 'Cancel' : 'Register Patient' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="page-body">
+
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Register Form -->
+    <div class="card form-card" *ngIf="showForm">
+      <div class="card-head"><i class="ti ti-user-plus"></i> Register New Patient</div>
+      <form [formGroup]="registerForm" (ngSubmit)="onRegister()" class="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Full Name *</label>
+            <input type="text" formControlName="name" placeholder="Patient full name" class="form-control" />
+            <small class="hint-err" *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">Name is required (min 2 chars).</small>
+          </div>
+          <div class="field">
+            <label>Date of Birth *</label>
+            <input type="date" formControlName="dob" class="form-control" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Gender *</label>
+            <select formControlName="gender" class="form-select">
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Contact Number *</label>
+            <input type="tel" formControlName="contactInfo" inputmode="numeric" maxlength="10" placeholder="10-digit mobile number" class="form-control" />
+            <small class="hint-err" *ngIf="registerForm.get('contactInfo')?.touched && registerForm.get('contactInfo')?.invalid">Enter a valid 10-digit phone number.</small>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Address *</label>
+          <textarea formControlName="address" rows="2" placeholder="Full address" class="form-control"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm"></span>
+            <i *ngIf="!isSubmitting" class="ti ti-device-floppy"></i>
+            {{ isSubmitting ? 'Registering...' : 'Register Patient' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="showForm = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="card form-card" *ngIf="editingId">
+      <div class="card-head"><i class="ti ti-edit"></i> Update Patient #{{ editingId }}</div>
+      <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="reg-form">
+        <div class="form-row">
+          <div class="field">
+            <label>Full Name *</label>
+            <input type="text" formControlName="name" class="form-control" />
+          </div>
+          <div class="field">
+            <label>Date of Birth *</label>
+            <input type="date" formControlName="dob" class="form-control" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field">
+            <label>Gender *</label>
+            <select formControlName="gender" class="form-select">
+              <option value="">Select gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Contact Number *</label>
+            <input type="tel" formControlName="contactInfo" inputmode="numeric" maxlength="10" class="form-control" />
+            <small class="hint-err" *ngIf="editForm.get('contactInfo')?.touched && editForm.get('contactInfo')?.invalid">Enter a valid 10-digit phone number.</small>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Address *</label>
+          <textarea formControlName="address" rows="2" class="form-control"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i> {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Search / Filter -->
+    <div class="card search-card">
+      <div class="search-row">
+        <div class="search-wrap">
+          <i class="ti ti-search search-ico"></i>
+          <input type="text" class="search-input" placeholder="Search by name..." [(ngModel)]="searchName" (keyup.enter)="onSearch()" />
+        </div>
+        <select class="form-select" [(ngModel)]="searchStatus" (change)="onSearch()">
+          <option value="">All status</option>
+          <option value="Active">Active</option>
+          <option value="InActive">Inactive</option>
+        </select>
+        <button class="btn-ghost" (click)="onSearch()"><i class="ti ti-filter"></i> Filter</button>
+        <button class="btn-ghost" (click)="onClearFilters()"><i class="ti ti-x"></i> Clear</button>
+        <span class="count-badge">{{ patients.length }} records</span>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-wrap" *ngIf="isLoading">
+      <div class="spinner"></div><p class="muted">Loading patients...</p>
+    </div>
+
+    <!-- Table -->
+    <div class="card" *ngIf="!isLoading">
+      <div class="empty" *ngIf="patients.length === 0">
+        <i class="ti ti-users-group"></i>
+        <div class="empty-title">No patients found</div>
+        <div class="empty-sub">Adjust filters or register a new patient</div>
+      </div>
+      <div class="table-wrap" *ngIf="patients.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Name</th>
+              <th>DOB</th>
+              <th>Gender</th>
+              <th>Contact</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of patients">
+              <td class="id-cell">#{{ p.patientId }}</td>
+              <td class="name-cell"><i class="ti ti-user-circle"></i>{{ p.name }}</td>
+              <td>{{ formatDate(p.dob) }}</td>
+              <td>{{ p.gender }}</td>
+              <td>{{ p.contactInfo }}</td>
+              <td><span class="badge" [ngClass]="getStatusClass(p.status)">{{ p.status }}</span></td>
+              <td>
+                <button class="row-btn btn-info" (click)="viewDetail(p.patientId)" title="View"><i class="ti ti-eye"></i></button>
+                <button class="row-btn btn-warning" *ngIf="canEdit" (click)="startEdit(p)" title="Edit"><i class="ti ti-edit"></i></button>
+                <button class="row-btn btn-danger" *ngIf="canEdit && p.status == '1'" (click)="deactivate(p)" title="Deactivate patient">
+                  <i class="ti ti-user-off"></i> 
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="pager" *ngIf="patients.length > 0">
+        <button class="btn-ghost" (click)="changePage(-1)" [disabled]="pageNumber === 1"><i class="ti ti-chevron-left"></i> Prev</button>
+        <span class="muted">Page {{ pageNumber }}</span>
+        <button class="btn-ghost" (click)="changePage(1)" [disabled]="patients.length < pageSize">Next <i class="ti ti-chevron-right"></i></button>
+      </div>
+    </div>
+
+    <!-- Detail modal -->
+    <div class="modal-backdrop" *ngIf="detailPatient" (click)="closeDetail()">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <div><i class="ti ti-user-circle"></i> Patient #{{ detailPatient.patientId }}</div>
+          <button class="icon-btn" (click)="closeDetail()"><i class="ti ti-x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="kv"><span>Name</span><b>{{ detailPatient.name }}</b></div>
+          <div class="kv"><span>DOB</span><b>{{ formatDate(detailPatient.dob) }}</b></div>
+          <div class="kv"><span>Gender</span><b>{{ detailPatient.gender }}</b></div>
+          <div class="kv"><span>Contact</span><b>{{ detailPatient.contactInfo }}</b></div>
+          <div class="kv"><span>Address</span><b>{{ detailPatient.address }}</b></div>
+          <div class="kv"><span>Status</span><b><span class="badge" [ngClass]="getStatusClass(detailPatient.status)">{{ detailPatient.status }}</span></b></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

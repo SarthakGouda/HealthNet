@@ -1,0 +1,166 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="ti ti-flask"></i>
+        </div>
+        <div>
+          <div class="page-title">Laboratory Tests</div>
+          <div class="page-sub">
+            <span class="dot"></span> Lab Testing Module · HealthNet
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="hbadge">
+          <i class="ti ti-shield-check"></i> HIPAA Compliant
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total Tests</div>
+        <div class="stat-value">{{ labTests.length }}</div>
+        <div class="stat-sub">All records</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value pending-val">{{ getPendingCount() }}</div>
+        <div class="stat-sub">Awaiting result</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value completed-val">{{ getCompletedCount() }}</div>
+        <div class="stat-sub">Results ready</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Blood Tests</div>
+        <div class="stat-value blue-val">{{ getTypeCount('Blood') }}</div>
+        <div class="stat-sub">Most common</div>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="ti ti-filter"></i> Filter Tests
+        </div>
+      </div>
+      <div class="filters">
+        <div>
+          <label>TEST TYPE</label>
+          <select class="form-select" [(ngModel)]="selectedType">
+            <option value="">All Types</option>
+            <option *ngFor="let type of typeOptions" [value]="type">{{ type }}</option>
+          </select>
+        </div>
+        <div>
+          <label>STATUS</label>
+          <select class="form-select" [(ngModel)]="selectedStatus">
+            <option value="">All Statuses</option>
+            <option *ngFor="let status of statusOptions" [value]="status">{{ status }}</option>
+          </select>
+        </div>
+        <div>
+          <label>DATE</label>
+          <input type="date" class="form-control" [(ngModel)]="selectedDate" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" (click)="applyFilters()">
+          <i class="ti ti-search"></i> Apply Filters
+        </button>
+        <button class="btn-ghost" (click)="clearFilters()">
+          <i class="ti ti-x"></i> Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-card" *ngIf="errorMsg">
+      <i class="ti ti-alert-circle"></i> {{ errorMsg }}
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-wrap" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <p class="muted-text">Loading lab tests...</p>
+    </div>
+
+    <!-- Results Card -->
+    <div class="card" *ngIf="!isLoading && !errorMsg">
+      <div class="card-header">
+        <div class="card-title">
+          <i class="ti ti-clipboard-list"></i> All Lab Tests
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+          <span class="count-badge">{{ labTests.length }} records</span>
+          <button class="btn-create"
+          *ngIf="canCreate"
+          (click)="navigateToCreate()">
+          <i class="ti ti-plus"></i> New Test
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty" *ngIf="labTests.length === 0">
+        <i class="ti ti-flask-off"></i>
+        <div class="empty-title">No lab tests found</div>
+        <div class="empty-sub">Try adjusting your filters</div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-wrap" *ngIf="labTests.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Test ID</th>
+              <th>Patient ID</th>
+              <th>Type</th>
+              <th>Date</th>
+              <th>Technician</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let test of labTests; let i = index"
+                [style.animation-delay]="i * 0.05 + 's'"
+                (click)="viewDetails(test.testId)"
+                style="cursor: pointer;">
+              <td class="test-id">#{{ test.testId }}</td>
+              <td>P-{{ test.patientId }}</td>
+              <td>
+                <span class="type-chip">
+                  <i class="ti ti-flask"></i>{{ test.type }}
+                </span>
+              </td>
+              <td>
+                <div class="date-cell">
+                  <i class="ti ti-calendar"></i>
+                  {{ formatDate(test.date) }}
+                </div>
+              </td>
+              <td>Tech-{{ test.technicianId }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatusClass(test.status)">
+                  {{ getStatusLabel(test.status) }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

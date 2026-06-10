@@ -1,0 +1,224 @@
+<div class="ch-page">
+
+  <!-- HEADER -->
+  <div class="ch-header">
+    <div class="ch-header-inner">
+      <div class="ch-header-left">
+        <div class="page-badge">
+          <span class="live-dot"></span>Citizen Health Portal
+        </div>
+        <h1 class="ch-title">{{ currentTime }}, {{ citizenName }}!</h1>
+        <p class="ch-sub">Here's your health overview for today · {{ today | date:'EEEE, MMM d, yyyy' }}</p>
+      </div>
+      <div class="ch-header-actions">
+        <button class="hdr-btn" (click)="navigateTo('/symptom-report')">
+          <i class="ti ti-plus"></i>New Report
+        </button>
+        <button class="hdr-btn" (click)="navigateTo('/symptom-history')">
+          <i class="ti ti-clipboard-list"></i>My Reports
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ch-body">
+
+    <!-- STATS ROW -->
+    <div class="stats-grid">
+      <div class="stat-card" (click)="navigateToHistoryWithFilter(null)">
+        <div class="stat-icon" style="background:#E6F1FB">
+          <i class="ti ti-file-report" style="color:#185FA5"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-num">{{ totalReports }}</div>
+          <div class="stat-label">Total Reports</div>
+        </div>
+        <i class="ti ti-arrow-right stat-arrow"></i>
+      </div>
+      <div class="stat-card" (click)="navigateToHistoryWithFilter('Submitted')">
+        <div class="stat-icon" style="background:#FAEEDA">
+          <i class="ti ti-clock" style="color:#854F0B"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-num">{{ submittedCount }}</div>
+          <div class="stat-label">Pending Review</div>
+        </div>
+        <i class="ti ti-arrow-right stat-arrow"></i>
+      </div>
+      <div class="stat-card" (click)="navigateToHistoryWithFilter('UnderReview')">
+        <div class="stat-icon" style="background:#daeaf8">
+          <i class="ti ti-search" style="color:#0C447C"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-num">{{ underReviewCount }}</div>
+          <div class="stat-label">Under Review</div>
+        </div>
+        <i class="ti ti-arrow-right stat-arrow"></i>
+      </div>
+      <div class="stat-card" (click)="navigateToHistoryWithFilter('Reviewed')">
+        <div class="stat-icon" style="background:#E1F5EE">
+          <i class="ti ti-circle-check" style="color:#0F6E56"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-num">{{ reviewedCount }}</div>
+          <div class="stat-label">Reviewed</div>
+        </div>
+        <i class="ti ti-arrow-right stat-arrow"></i>
+      </div>
+    </div>
+
+    <div class="two-col">
+
+      <!-- LEFT COLUMN -->
+      <div class="left-col">
+
+        <!-- QUICK ACTIONS -->
+        <div class="sec-card">
+          <div class="sec-card-header">
+            <div class="sec-card-icon" style="background:#E6F1FB">
+              <i class="ti ti-bolt" style="color:#185FA5"></i>
+            </div>
+            <div>
+              <div class="sec-card-title">Quick Actions</div>
+              <div class="sec-card-sub">Common health actions</div>
+            </div>
+          </div>
+          <div class="actions-grid">
+            <button class="action-btn" (click)="navigateTo('/symptom-report')">
+              <div class="action-icon" style="background:#E6F1FB">
+                <i class="ti ti-report-medical" style="color:#185FA5;font-size:20px"></i>
+              </div>
+              <span class="action-label">Report Symptoms</span>
+              <span class="action-sub">Submit a new report</span>
+            </button>
+            <button class="action-btn" (click)="navigateTo('/symptom-history')">
+              <div class="action-icon" style="background:#E1F5EE">
+                <i class="ti ti-history" style="color:#0F6E56;font-size:20px"></i>
+              </div>
+              <span class="action-label">View History</span>
+              <span class="action-sub">Past reports</span>
+            </button>
+            <button class="action-btn" (click)="navigateTo('/outbreaks')">
+              <div class="action-icon" style="background:#FCEBEB">
+                <i class="ti ti-virus" style="color:#791F1F;font-size:20px"></i>
+              </div>
+              <span class="action-label">Outbreak Map</span>
+              <span class="action-sub">Active outbreaks</span>
+            </button>
+            <button class="action-btn" (click)="navigateTo('/about')">
+              <div class="action-icon" style="background:#EEEDFE">
+                <i class="ti ti-info-circle" style="color:#534AB7;font-size:20px"></i>
+              </div>
+              <span class="action-label">Health Info</span>
+              <span class="action-sub">Guidelines</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- RECENT REPORTS -->
+        <div class="sec-card">
+          <div class="sec-card-header">
+            <div class="sec-card-icon" style="background:#E6F1FB">
+              <i class="ti ti-clipboard-list" style="color:#185FA5"></i>
+            </div>
+            <div>
+              <div class="sec-card-title">Recent Reports</div>
+              <div class="sec-card-sub">Your last 3 submissions</div>
+            </div>
+            <button class="see-all-btn" (click)="navigateTo('/symptom-history')">
+              See all <i class="ti ti-arrow-right"></i>
+            </button>
+          </div>
+
+          <div *ngIf="isLoading" class="mini-loading">
+            <div class="mini-spinner"></div>
+            <span>Loading...</span>
+          </div>
+
+          <div *ngIf="!isLoading && recentReports.length === 0" class="mini-empty">
+            <i class="ti ti-clipboard"></i>
+            <span>No reports yet</span>
+            <button class="mini-btn" (click)="navigateTo('/symptom-report')">
+              Create one
+            </button>
+          </div>
+
+          <div *ngFor="let r of recentReports" class="mini-report">
+            <div class="mini-report-top">
+              <span class="mini-report-id">#{{ r.reportId }}</span>
+              <span class="mini-report-date">
+                <i class="ti ti-calendar"></i>
+                {{ r.date | date:'MMM d, yyyy' }}
+              </span>
+              <span [class]="getStatusClass(r.status)">{{ r.status }}</span>
+            </div>
+            <div class="mini-tags" *ngIf="parsedSymptoms(r.symptomsJson).length > 0">
+              <span *ngFor="let s of parsedSymptoms(r.symptomsJson)" class="mini-tag">{{ s }}</span>
+              <span class="mini-tag-more" *ngIf="parsedSymptoms(r.symptomsJson).length === 3">+more</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="right-col">
+
+        <!-- OUTBREAK ALERTS -->
+        <div class="sec-card">
+          <div class="sec-card-header">
+            <div class="sec-card-icon" style="background:#FCEBEB">
+              <i class="ti ti-alert-triangle" style="color:#791F1F"></i>
+            </div>
+            <div>
+              <div class="sec-card-title">Outbreak Alerts</div>
+              <div class="sec-card-sub">Active in your region</div>
+            </div>
+            <span class="alert-count">{{ outbreakAlerts.length }} active</span>
+          </div>
+
+          <div *ngFor="let alert of outbreakAlerts" class="outbreak-item">
+            <div class="outbreak-left">
+              <div class="outbreak-disease">{{ alert.disease }}</div>
+              <div class="outbreak-location">
+                <i class="ti ti-map-pin"></i>{{ alert.location }}
+              </div>
+              <div class="outbreak-cases">
+                <i class="ti ti-users"></i>{{ alert.cases }} reported cases
+              </div>
+            </div>
+            <div class="outbreak-right">
+              <span [class]="getSeverityClass(alert.severity)">{{ alert.severity }}</span>
+              <div class="outbreak-date">{{ alert.date | date:'MMM d' }}</div>
+            </div>
+          </div>
+
+          <button class="see-all-btn full-width" (click)="navigateTo('/outbreaks')">
+            View all outbreaks <i class="ti ti-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- HEALTH TIPS -->
+        <div class="sec-card">
+          <div class="sec-card-header">
+            <div class="sec-card-icon" style="background:#E1F5EE">
+              <i class="ti ti-heart" style="color:#0F6E56"></i>
+            </div>
+            <div>
+              <div class="sec-card-title">Health Tips</div>
+              <div class="sec-card-sub">Stay healthy today</div>
+            </div>
+          </div>
+          <div *ngFor="let tip of healthTips" class="tip-item">
+            <div class="tip-icon-wrap" [style.background]="tip.color + '18'">
+              <i [class]="'ti ' + tip.icon" [style.color]="tip.color"></i>
+            </div>
+            <span class="tip-text">{{ tip.tip }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>

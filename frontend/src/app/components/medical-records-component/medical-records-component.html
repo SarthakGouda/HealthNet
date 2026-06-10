@@ -1,0 +1,164 @@
+<div class="page">
+  <div class="page-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-file-medical"></i></div>
+        <div>
+          <div class="page-title">Medical Records</div>
+          <div class="page-sub"><span class="dot"></span>Patient Records · HealthNet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="page-body">
+    <div *ngIf="success" class="success-bar"><i class="ti ti-circle-check"></i>{{ success }}</div>
+    <div *ngIf="error" class="error-bar"><i class="ti ti-alert-circle"></i>{{ error }}</div>
+
+    <!-- Search patient -->
+    <div class="card search-card">
+      <div class="card-head"><i class="ti ti-search"></i> Lookup Patient Records</div>
+      <div class="search-row">
+        <div style="flex:1;min-width:240px;max-width:360px;">
+          <app-id-picker
+            [options]="patients$ | async"
+            placeholder="Choose a patient…"
+            [ngModel]="selectedPatientId"
+            (ngModelChange)="onPickPatient($event)">
+          </app-id-picker>
+        </div>
+        <button class="btn-create-small" *ngIf="canAdd && patientId" (click)="showForm = !showForm; editingRecordId = null">
+          <i class="ti ti-plus"></i> {{ showForm ? 'Cancel' : 'Add Record' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Add form -->
+    <div class="card form-card" *ngIf="showForm && canAdd && patientId">
+      <div class="card-head"><i class="ti ti-plus"></i> New Medical Record — Patient #{{ patientId }}</div>
+      <form [formGroup]="addForm" (ngSubmit)="onAdd()" class="reg-form">
+        <div class="info-hint">
+          <i class="ti ti-info-circle"></i>
+          <span>
+            Only one record can be active per patient. If a previous record is still active you must
+            <strong>Deactivate</strong> it first via the panel below before adding a new one.
+          </span>
+        </div>
+
+        <div class="field full">
+          <label>Diagnosis *</label>
+          <textarea formControlName="diagnosis" rows="2" class="form-control" placeholder="Diagnosis details (at least 3 chars, must contain letters)..."></textarea>
+          <small class="hint-err" *ngIf="addForm.get('diagnosis')?.touched && addForm.get('diagnosis')?.errors?.['required']">Diagnosis is required.</small>
+          <small class="hint-err" *ngIf="addForm.get('diagnosis')?.errors?.['minlength']">Minimum 3 characters.</small>
+          <small class="hint-err" *ngIf="addForm.get('diagnosis')?.errors?.['noLetter']">Diagnosis must contain meaningful text, not just digits.</small>
+        </div>
+
+        <div class="field full">
+          <label>Treatment Plan *</label>
+          <textarea formControlName="treatmentPlan" rows="3" class="form-control" placeholder="Treatment plan (at least 3 chars, must contain letters)..."></textarea>
+          <small class="hint-err" *ngIf="addForm.get('treatmentPlan')?.touched && addForm.get('treatmentPlan')?.errors?.['required']">Treatment plan is required.</small>
+          <small class="hint-err" *ngIf="addForm.get('treatmentPlan')?.errors?.['minlength']">Minimum 3 characters.</small>
+          <small class="hint-err" *ngIf="addForm.get('treatmentPlan')?.errors?.['noLetter']">Treatment plan must contain meaningful text, not just digits.</small>
+        </div>
+
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" formControlName="date" [max]="todayISO" class="form-control" />
+          <small class="hint-err" *ngIf="addForm.get('date')?.touched && addForm.get('date')?.invalid">Date is required and cannot be in the future.</small>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i>{{ isSubmitting ? 'Saving...' : 'Save Record' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="showForm = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Edit form -->
+    <div class="card form-card" *ngIf="editingRecordId && canMutate">
+      <div class="card-head"><i class="ti ti-edit"></i> Update Medical Record #{{ editingRecordId }}</div>
+      <form [formGroup]="editForm" (ngSubmit)="onSaveEdit()" class="reg-form">
+        <div class="field full">
+          <label>Diagnosis *</label>
+          <textarea formControlName="diagnosis" rows="2" class="form-control"></textarea>
+        </div>
+        <div class="field full">
+          <label>Treatment Plan *</label>
+          <textarea formControlName="treatmentPlan" rows="3" class="form-control"></textarea>
+        </div>
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" formControlName="date" [max]="todayISO" class="form-control" />
+        </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" [disabled]="isSubmitting">
+            <i class="ti ti-device-floppy"></i>{{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+          </button>
+          <button type="button" class="btn-ghost" (click)="cancelEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Manage by record ID (since GetRecords doesn't return recordId) -->
+    <div class="card form-card" *ngIf="canMutate && patientId && !editingRecordId">
+      <div class="card-head"><i class="ti ti-settings"></i> Manage a specific record</div>
+      <form [formGroup]="manageForm" class="reg-form" (ngSubmit)="$event.preventDefault()">
+        <div class="form-row">
+          <div class="field">
+            <label>Record ID *</label>
+            <input type="number" min="1" formControlName="recordId" class="form-control" placeholder="Enter record ID to edit/deactivate" />
+          </div>
+          <div class="field"><label>&nbsp;</label>
+            <div class="form-actions" style="justify-content:flex-start;gap:8px;">
+              <button type="button" class="btn-primary" (click)="startEditById()">
+                <i class="ti ti-edit"></i> Edit
+              </button>
+              <button type="button" class="row-btn btn-danger" (click)="deactivateById()">
+                <i class="ti ti-ban"></i> Deactivate
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="loading-wrap" *ngIf="isLoading"><div class="spinner"></div><p class="muted">Loading records...</p></div>
+
+    <div class="card" *ngIf="!isLoading && patientId">
+      <div class="card-head between">
+        <span><i class="ti ti-file-medical"></i> Patient #{{ patientId }} — Medical Records</span>
+        <span class="count-badge">{{ records.length }} records</span>
+      </div>
+      <div class="empty" *ngIf="records.length === 0">
+        <i class="ti ti-file-off"></i>
+        <div class="empty-title">No records found</div>
+        <div class="empty-sub">No medical records for this patient yet</div>
+      </div>
+      <div class="table-wrap" *ngIf="records.length > 0">
+        <table>
+          <thead>
+            <tr><th>Record ID</th><th>Diagnosis</th><th>Treatment Plan</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of records">
+              <td class="id-cell">{{ r.recordId ? '#' + r.recordId : '—' }}</td>
+              <td>{{ r.diagnosis }}</td>
+              <td class="diag-cell">{{ r.treatmentPlan }}</td>
+              <td>{{ formatDate(r.date) }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="info-hint" *ngIf="canMutate">
+          <i class="ti ti-info-circle"></i>
+          Backend doesn't return record IDs in the list. Use <strong>Manage a specific record</strong> above to update or deactivate by ID.
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-start" *ngIf="!patientId && !isLoading">
+      <i class="ti ti-search"></i>
+      <p>Enter a Patient ID to load their medical records</p>
+    </div>
+  </div>
+</div>
